@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getBooking } from "@/lib/booking";
 
-export default function ConfirmedPage() {
+function ConfirmedContent() {
   const searchParams = useSearchParams();
   const bookingId = searchParams.get("id");
   const [name, setName] = useState("");
@@ -126,5 +126,19 @@ export default function ConfirmedPage() {
         </Link>
       </div>
     </section>
+  );
+}
+
+export default function ConfirmedPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="max-w-2xl mx-auto px-6 py-28 text-center">
+          <p className="text-muted">Loading...</p>
+        </section>
+      }
+    >
+      <ConfirmedContent />
+    </Suspense>
   );
 }

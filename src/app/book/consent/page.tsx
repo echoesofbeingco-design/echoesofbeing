@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getBooking, updateBookingConsent } from "@/lib/booking";
 
-export default function ConsentPage() {
+function ConsentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = searchParams.get("id");
@@ -184,5 +184,19 @@ export default function ConsentPage() {
         </form>
       </section>
     </>
+  );
+}
+
+export default function ConsentPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="max-w-2xl mx-auto px-6 py-28 text-center">
+          <p className="text-muted">Loading...</p>
+        </section>
+      }
+    >
+      <ConsentContent />
+    </Suspense>
   );
 }
