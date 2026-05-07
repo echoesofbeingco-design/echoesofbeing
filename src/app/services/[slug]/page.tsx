@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import FadeImage from "@/components/FadeImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { services, getServiceBySlug } from "@/data/services";
@@ -35,13 +35,14 @@ export default async function ServiceDetailPage({
     <>
       {/* Hero */}
       <section className="relative">
-        <div className="h-[320px] md:h-[420px] relative overflow-hidden">
-          <Image
+        <div className="h-[320px] md:h-[420px] relative overflow-hidden bg-secondary-bg">
+          <FadeImage
             src={service.image}
             alt={service.imageAlt}
             fill
             className="object-cover"
             priority
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-cream via-cream/40 to-transparent" />
         </div>

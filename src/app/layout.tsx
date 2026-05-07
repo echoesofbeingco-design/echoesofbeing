@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
+import PreloadImages from "@/components/PreloadImages";
 
 const lora = Lora({
   variable: "--font-serif",
@@ -39,6 +40,7 @@ export default function RootLayout({
           <PageTransition>{children}</PageTransition>
         </main>
         <Footer />
+        <PreloadImages />
       </body>
     </html>
   );
