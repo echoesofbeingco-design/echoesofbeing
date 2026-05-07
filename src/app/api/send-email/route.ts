@@ -97,6 +97,18 @@ function adminBookingEmail(booking: Record<string, unknown>) {
           <td style="padding: 8px 12px; border: 1px solid #d1d2c7;">${booking.whatsapp}</td>
         </tr>
         <tr>
+          <td style="padding: 8px 12px; border: 1px solid #d1d2c7; font-weight: 600; background: #f7f5ec;">Age</td>
+          <td style="padding: 8px 12px; border: 1px solid #d1d2c7;">${booking.age || "Not provided"}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 12px; border: 1px solid #d1d2c7; font-weight: 600; background: #f7f5ec;">Gender</td>
+          <td style="padding: 8px 12px; border: 1px solid #d1d2c7;">${booking.gender || "Not provided"}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 12px; border: 1px solid #d1d2c7; font-weight: 600; background: #f7f5ec;">Pronouns</td>
+          <td style="padding: 8px 12px; border: 1px solid #d1d2c7;">${booking.pronouns || "Not provided"}</td>
+        </tr>
+        <tr>
           <td style="padding: 8px 12px; border: 1px solid #d1d2c7; font-weight: 600; background: #f7f5ec;">Session Type</td>
           <td style="padding: 8px 12px; border: 1px solid #d1d2c7;">${booking.sessionType || "Not selected"}</td>
         </tr>

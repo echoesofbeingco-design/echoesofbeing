@@ -19,6 +19,9 @@ export default function BookPage() {
     name: "",
     email: "",
     whatsapp: "",
+    age: "",
+    gender: "",
+    pronouns: "",
     sessionType: "",
     category: "",
     concern: "",
@@ -202,6 +205,68 @@ export default function BookPage() {
             />
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
+                Age <span className="text-sage-500">*</span>
+              </label>
+              <input
+                type="number"
+                required
+                min="1"
+                max="120"
+                value={form.age}
+                onChange={(e) => updateField("age", e.target.value)}
+                placeholder="Your age"
+                className="w-full px-4 py-3 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
+                Gender <span className="text-sage-500">*</span>
+              </label>
+              <select
+                required
+                value={form.gender}
+                onChange={(e) => updateField("gender", e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm"
+              >
+                <option value="" disabled>Select</option>
+                <option>Female</option>
+                <option>Male</option>
+                <option>Non-binary</option>
+                <option>Genderqueer</option>
+                <option>Genderfluid</option>
+                <option>Agender</option>
+                <option>Other</option>
+                <option>Rather not say</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
+                Pronouns
+              </label>
+              <select
+                value={form.pronouns}
+                onChange={(e) => updateField("pronouns", e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm"
+              >
+                <option value="">Select</option>
+                <option>She/Her</option>
+                <option>He/Him</option>
+                <option>They/Them</option>
+                <option>She/They</option>
+                <option>He/They</option>
+                <option>Ze/Zir</option>
+                <option>Any pronouns</option>
+                <option>Other</option>
+                <option>Rather not say</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
               What brings you here? (optional)
@@ -227,8 +292,8 @@ export default function BookPage() {
                 className="w-full px-4 py-3 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm"
               >
                 <option value="" disabled>Select session type</option>
-                <option>Introductory consultation</option>
-                <option>Individual therapy</option>
+                <option value="Introductory consultation">Introductory consultation (Free)</option>
+                <option value="Individual therapy">Individual therapy (₹2,000)</option>
               </select>
             </div>
 

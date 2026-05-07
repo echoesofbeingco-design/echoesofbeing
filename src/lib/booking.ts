@@ -12,6 +12,9 @@ export interface BookingData {
   name: string;
   email: string;
   whatsapp: string;
+  age: string;
+  gender: string;
+  pronouns: string;
   sessionType: string;
   category: string;
   concern: string;

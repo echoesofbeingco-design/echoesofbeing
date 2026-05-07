@@ -98,16 +98,16 @@ export default function Home() {
               <Link
                 key={service.slug}
                 href={`/services/${service.slug}`}
-                className="group border border-border rounded-2xl p-8 hover:border-sage-400/60 hover:shadow-sm transition-all duration-300 block"
+                className="group border border-border rounded-2xl p-5 md:p-8 hover:border-sage-400/60 hover:shadow-md transition-all duration-300 block cursor-pointer"
               >
-                <div className="w-10 h-10 rounded-full bg-secondary-bg mb-6 transition-all duration-300 group-hover:scale-125 group-hover:bg-sage-400/40" />
-                <h3 className="font-serif text-lg font-medium mb-3">
+                <div className="w-10 h-10 rounded-full bg-secondary-bg mb-5 md:mb-6 transition-all duration-300 group-hover:scale-125 group-hover:bg-sage-400/40" />
+                <h3 className="font-serif text-lg font-medium mb-2 md:mb-3">
                   {service.title}
                 </h3>
-                <p className="text-sm text-muted leading-relaxed">
+                <p className="text-sm text-muted leading-relaxed mb-4">
                   {service.description}
                 </p>
-                <span className="inline-flex items-center gap-1.5 text-sm text-sage-600 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="inline-flex items-center gap-1.5 text-sm text-sage-600 font-medium transition-all duration-300 group-hover:gap-2.5">
                   Learn more
                   <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
