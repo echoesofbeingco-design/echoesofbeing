@@ -68,8 +68,10 @@ export async function updateBookingConsent(
   });
 }
 
-export async function getBooking(bookingId: string) {
+export async function getBooking(
+  bookingId: string
+): Promise<Record<string, unknown> | null> {
   const snap = await getDoc(doc(db, "bookings", bookingId));
   if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() };
+  return { id: snap.id, ...snap.data() } as Record<string, unknown>;
 }
