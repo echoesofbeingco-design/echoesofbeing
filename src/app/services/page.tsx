@@ -21,7 +21,7 @@ const plans = [
     duration: "50 minutes",
     price: "₹2,500 / session",
     description:
-      "Weekly or fortnightly one-to-one sessions. Online or in-person. Most clients begin here.",
+      "Weekly or fortnightly one-to-one sessions held online. Most clients begin here.",
     highlighted: true,
     badge: "Most chosen",
   },

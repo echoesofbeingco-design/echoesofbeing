@@ -54,7 +54,7 @@ export default function Footer() {
             <h3 className="text-xs font-semibold tracking-widest uppercase mb-4">
               Contact
             </h3>
-            <p className="text-sm text-muted">hello@echosofbeing.com</p>
+            <p className="text-sm text-muted">echoesofbeing.co@gmail.com</p>
             <p className="text-sm text-muted mt-1">By appointment only</p>
           </div>
         </div>
