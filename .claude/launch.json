@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "echos-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "3002"],
+      "port": 3002,
+      "cwd": "C:\\Users\\HP\\Desktop\\Personal_codes\\EchoesofBeing\\echos-of-being"
+    }
+  ]
+}
