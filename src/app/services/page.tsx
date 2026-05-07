@@ -19,27 +19,11 @@ const plans = [
   {
     title: "Individual therapy",
     duration: "50 minutes",
-    price: "₹2,500 / session",
+    price: "₹2,000 / session",
     description:
       "Weekly or fortnightly one-to-one sessions held online. Most clients begin here.",
     highlighted: true,
     badge: "Most chosen",
-  },
-  {
-    title: "Couples session",
-    duration: "75 minutes",
-    price: "₹4,000 / session",
-    description:
-      "Working together with both partners on communication, attachment, and recurring patterns.",
-    highlighted: false,
-  },
-  {
-    title: "Extended deep-dive",
-    duration: "90 minutes",
-    price: "₹4,200 / session",
-    description:
-      "A longer session for grief work, trauma processing, or moments that need more space.",
-    highlighted: false,
   },
 ];
 

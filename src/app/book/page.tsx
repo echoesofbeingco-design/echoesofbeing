@@ -229,8 +229,6 @@ export default function BookPage() {
                 <option value="" disabled>Select session type</option>
                 <option>Introductory consultation</option>
                 <option>Individual therapy</option>
-                <option>Couples session</option>
-                <option>Extended deep-dive</option>
               </select>
             </div>
 
