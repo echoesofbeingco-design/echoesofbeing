@@ -56,6 +56,14 @@ export default function Footer() {
             </h3>
             <p className="text-sm text-muted">echoesofbeing.co@gmail.com</p>
             <p className="text-sm text-muted mt-1">By appointment only</p>
+            <div className="mt-6">
+              <Link
+                href="/terms"
+                className="text-xs text-muted hover:text-forest transition-colors duration-300"
+              >
+                Terms & Conditions
+              </Link>
+            </div>
           </div>
         </div>
       </div>

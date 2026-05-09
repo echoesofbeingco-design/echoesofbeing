@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getBooking, updateBookingConsent } from "@/lib/booking";
+import { showToast } from "@/components/Toast";
 
 function ConsentContent() {
   const router = useRouter();
@@ -56,7 +57,7 @@ function ConsentContent() {
 
       router.push(`/book/confirmed?id=${bookingId}`);
     } catch {
-      alert("Something went wrong. Please try again.");
+      showToast("Something went wrong. Please try again.", "error");
     } finally {
       setSubmitting(false);
     }
