@@ -31,6 +31,14 @@ export default function Navbar() {
               Services
             </Link>
             <Link
+              href="/blog"
+              className={`text-sm transition-colors duration-300 hover:text-sage-600 ${
+                pathname.startsWith("/blog") ? "text-sage-600" : "text-forest"
+              }`}
+            >
+              Blog
+            </Link>
+            <Link
               href="/about"
               className={`text-sm transition-colors duration-300 hover:text-sage-600 ${
                 pathname === "/about" ? "text-sage-600" : "text-forest"
@@ -79,6 +87,13 @@ export default function Navbar() {
               className="text-sm py-2"
             >
               Services
+            </Link>
+            <Link
+              href="/blog"
+              onClick={() => setMobileOpen(false)}
+              className="text-sm py-2"
+            >
+              Blog
             </Link>
             <Link
               href="/about"
