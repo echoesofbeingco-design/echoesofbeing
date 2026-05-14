@@ -24,6 +24,11 @@ body {
   font-family: var(--font-sans);
 }
 
+a,
+button {
+  cursor: pointer;
+}
+
 ::selection {
   background-color: var(--color-secondary-bg);
   color: var(--color-forest);

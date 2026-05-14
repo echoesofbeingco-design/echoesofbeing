@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
 import PreloadImages from "@/components/PreloadImages";
 import ToastProvider from "@/components/Toast";
+import { AuthProvider } from "@/components/AuthProvider";
+import FloatingBookBtn from "@/components/FloatingBookBtn";
 
 const lora = Lora({
   variable: "--font-serif",
@@ -36,13 +38,16 @@ export default function RootLayout({
       className={`${lora.variable} ${nunitoSans.variable} antialiased`}
     >
       <body className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1">
-          <PageTransition>{children}</PageTransition>
-        </main>
-        <Footer />
-        <PreloadImages />
-        <ToastProvider />
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <Footer />
+          <FloatingBookBtn />
+          <PreloadImages />
+          <ToastProvider />
+        </AuthProvider>
       </body>
     </html>
   );

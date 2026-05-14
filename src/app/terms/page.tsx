@@ -139,7 +139,40 @@ const sections = [
     ],
   },
   {
-    title: "17. Contact",
+    title: "17. Community Guidelines",
+    content: [
+      "The Echos of Being Community is a peer support space for sharing thoughts, experiences, and encouragement. By using the Community, you agree to the following guidelines:",
+      "Be respectful and kind. Treat every member with empathy, regardless of their background, identity, or beliefs. This is a safe space for vulnerability.",
+      "No hate speech, slurs, or offensive language. Content that is harmful, discriminatory, threatening, or sexually explicit will be automatically removed. This includes content in all languages.",
+      "No harassment or bullying. Targeting, mocking, or intimidating other members is strictly prohibited.",
+      "No promotion of self-harm or harm to others. If you or someone you know is in crisis, please contact an emergency helpline immediately (iCall: 9152987821, Vandrevala Foundation: 1860-2662-345).",
+      "No spam or self-promotion. The Community is for genuine conversation, not advertising or solicitation.",
+      "Respect anonymity. Do not attempt to identify anonymous posters or share their information.",
+      "Reports are taken seriously. Content that receives multiple reports from community members will be automatically reviewed and may be removed.",
+      "Violations may result in account suspension. Echos of Being reserves the right to suspend or ban accounts that repeatedly violate these guidelines.",
+    ],
+  },
+  {
+    title: "18. User-Generated Content",
+    content: [
+      "By posting content on the Echos of Being Community, you grant Echos of Being a non-exclusive, royalty-free licence to display your content within the platform.",
+      "You retain ownership of your content but are responsible for ensuring it does not violate any laws or the rights of others.",
+      "Echos of Being reserves the right to remove any content that violates these terms or Community Guidelines without prior notice.",
+      "Anonymous posts are attributed to 'Anonymous' publicly. The identity of anonymous posters is stored securely and is not shared with other users, but may be disclosed to law enforcement if required by Indian law.",
+    ],
+  },
+  {
+    title: "19. Community Account & Security",
+    content: [
+      "To participate in the Community, you must create an account with a valid email address and password. You are responsible for maintaining the confidentiality of your login credentials.",
+      "Passwords are encrypted using industry-standard hashing (bcrypt). Echos of Being cannot and does not store your password in plain text.",
+      "Account actions — including posting, commenting, upvoting, and reporting — are rate-limited to prevent abuse and protect the platform's integrity.",
+      "If you forget your password, you may request a one-time reset link sent to your registered email. This link expires after 1 hour and can only be used once.",
+      "Echos of Being implements security measures including DDoS protection, input validation, and session management to protect your account and data.",
+    ],
+  },
+  {
+    title: "20. Contact",
     content: [
       "If you have any questions, concerns, or requests regarding these Terms & Conditions or your personal data, please contact us:",
     ],
@@ -174,7 +207,14 @@ export default function TermsPage() {
         <div className="max-w-3xl mx-auto px-6">
           <div className="space-y-12">
             {sections.map((section) => (
-              <article key={section.title}>
+              <article
+                key={section.title}
+                id={
+                  section.title === "17. Community Guidelines"
+                    ? "community-guidelines"
+                    : undefined
+                }
+              >
                 <h2 className="font-serif text-xl md:text-2xl font-medium mb-4">
                   {section.title}
                 </h2>
@@ -188,7 +228,7 @@ export default function TermsPage() {
                     </p>
                   ))}
                 </div>
-                {section.title === "17. Contact" && (
+                {section.title === "20. Contact" && (
                   <div className="mt-4 bg-accent-bg/50 rounded-xl p-6">
                     <p className="text-sm font-medium mb-1">Echos of Being</p>
                     <p className="text-sm text-muted">

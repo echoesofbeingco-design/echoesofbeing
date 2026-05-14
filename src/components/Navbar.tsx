@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, loading } = useAuth();
 
   return (
     <header className="sticky top-0 z-50">
@@ -39,6 +41,16 @@ export default function Navbar() {
               Blog
             </Link>
             <Link
+              href="/community"
+              className={`text-sm transition-colors duration-300 hover:text-sage-600 ${
+                pathname.startsWith("/community")
+                  ? "text-sage-600"
+                  : "text-forest"
+              }`}
+            >
+              Community
+            </Link>
+            <Link
               href="/about"
               className={`text-sm transition-colors duration-300 hover:text-sage-600 ${
                 pathname === "/about" ? "text-sage-600" : "text-forest"
@@ -46,6 +58,45 @@ export default function Navbar() {
             >
               About
             </Link>
+
+            {/* Profile icon or Login link */}
+            {!loading && (
+              <>
+                {user ? (
+                  <Link
+                    href="/community/profile"
+                    className={`p-2 rounded-full transition-colors duration-200 ${
+                      pathname === "/community/profile"
+                        ? "text-sage-600 bg-accent-bg"
+                        : "text-muted hover:text-sage-600 hover:bg-accent-bg"
+                    }`}
+                    aria-label="Profile"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                      />
+                    </svg>
+                  </Link>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    className="text-sm text-sage-600 hover:text-sage-700 font-medium transition-colors"
+                  >
+                    Log in
+                  </Link>
+                )}
+              </>
+            )}
+
             <Link
               href="/book"
               className="group text-sm bg-sage-600 text-cream px-5 py-2.5 rounded-full hover:bg-sage-700 hover:shadow-lg hover:shadow-sage-600/20 transition-all duration-300 inline-flex items-center gap-1.5"
@@ -96,12 +147,56 @@ export default function Navbar() {
               Blog
             </Link>
             <Link
+              href="/community"
+              onClick={() => setMobileOpen(false)}
+              className="text-sm py-2"
+            >
+              Community
+            </Link>
+            <Link
               href="/about"
               onClick={() => setMobileOpen(false)}
               className="text-sm py-2"
             >
               About
             </Link>
+
+            {/* Auth in mobile */}
+            {!loading && (
+              <>
+                {user ? (
+                  <Link
+                    href="/community/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 py-2 border-t border-border mt-1 pt-4 text-sm text-muted hover:text-sage-600 transition-colors"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                      />
+                    </svg>
+                    My Profile
+                  </Link>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-sm py-2 text-sage-600 font-medium"
+                  >
+                    Log in / Sign up
+                  </Link>
+                )}
+              </>
+            )}
+
             <Link
               href="/book"
               onClick={() => setMobileOpen(false)}

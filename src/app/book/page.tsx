@@ -71,6 +71,8 @@ export default function BookPage() {
   });
 
   // Honeypot field — invisible to real users, bots auto-fill it
+  const [genderOther, setGenderOther] = useState("");
+  const [pronounsOther, setPronounsOther] = useState("");
   const [honeypot, setHoneypot] = useState("");
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -121,7 +123,17 @@ export default function BookPage() {
       if (ageNum < 1 || ageNum > 120) errors.age = "Enter a valid age.";
     }
 
-    if (!form.gender) errors.gender = "Please select your gender.";
+    if (!form.gender) {
+      errors.gender = "Please select your gender.";
+    } else if (form.gender === "Other" && !genderOther.trim()) {
+      errors.gender = "Please specify your gender.";
+    }
+    if (!form.pronouns) {
+      errors.pronouns = "Please select your pronouns.";
+    } else if (form.pronouns === "Other" && !pronounsOther.trim()) {
+      errors.pronouns = "Please specify your pronouns.";
+    }
+    if (!form.concern.trim()) errors.concern = "Please let us know what brings you here.";
     if (!form.sessionType) errors.sessionType = "Please select a session type.";
     if (!form.category) errors.category = "Please select a category.";
 
@@ -231,6 +243,12 @@ export default function BookPage() {
         name: form.name.trim(),
         email: form.email.trim().toLowerCase(),
         whatsapp: sanitizePhone(form.whatsapp),
+        gender:
+          form.gender === "Other" ? `Other: ${genderOther.trim()}` : form.gender,
+        pronouns:
+          form.pronouns === "Other"
+            ? `Other: ${pronounsOther.trim()}`
+            : form.pronouns,
         concern: form.concern.trim(),
       };
 
@@ -503,7 +521,10 @@ export default function BookPage() {
               <select
                 required
                 value={form.gender}
-                onChange={(e) => updateField("gender", e.target.value)}
+                onChange={(e) => {
+                  updateField("gender", e.target.value);
+                  if (e.target.value !== "Other") setGenderOther("");
+                }}
                 className={inputClass("gender")}
               >
                 <option value="" disabled>
@@ -511,6 +532,7 @@ export default function BookPage() {
                 </option>
                 <option>Female</option>
                 <option>Male</option>
+                <option>Transgender</option>
                 <option>Non-binary</option>
                 <option>Genderqueer</option>
                 <option>Genderfluid</option>
@@ -518,19 +540,32 @@ export default function BookPage() {
                 <option>Other</option>
                 <option>Rather not say</option>
               </select>
+              {form.gender === "Other" && (
+                <input
+                  type="text"
+                  value={genderOther}
+                  onChange={(e) => setGenderOther(e.target.value)}
+                  placeholder="Please specify"
+                  className="mt-2 w-full px-4 py-2.5 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm"
+                />
+              )}
               <FieldError field="gender" />
             </div>
 
             <div>
               <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-                Pronouns
+                Pronouns <span className="text-sage-500">*</span>
               </label>
               <select
+                required
                 value={form.pronouns}
-                onChange={(e) => updateField("pronouns", e.target.value)}
+                onChange={(e) => {
+                  updateField("pronouns", e.target.value);
+                  if (e.target.value !== "Other") setPronounsOther("");
+                }}
                 className={inputClass("pronouns")}
               >
-                <option value="">Select</option>
+                <option value="" disabled>Select</option>
                 <option>She/Her</option>
                 <option>He/Him</option>
                 <option>They/Them</option>
@@ -541,24 +576,40 @@ export default function BookPage() {
                 <option>Other</option>
                 <option>Rather not say</option>
               </select>
+              {form.pronouns === "Other" && (
+                <input
+                  type="text"
+                  value={pronounsOther}
+                  onChange={(e) => setPronounsOther(e.target.value)}
+                  placeholder="Please specify"
+                  className="mt-2 w-full px-4 py-2.5 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm"
+                />
+              )}
+              <FieldError field="pronouns" />
             </div>
           </div>
 
           <div>
             <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-              What brings you here? (optional)
+              What brings you here? <span className="text-sage-500">*</span>
             </label>
             <textarea
               rows={4}
+              required
               maxLength={2000}
               value={form.concern}
               onChange={(e) => updateField("concern", e.target.value)}
               placeholder="A few words about what you're going through, or any questions you have."
-              className="w-full px-4 py-3 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm resize-y"
+              className={`w-full px-4 py-3 rounded-lg border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm resize-y ${
+                fieldErrors.concern ? "border-red-300" : "border-border"
+              }`}
             />
-            <p className="text-[11px] text-muted text-right mt-1">
-              {form.concern.length}/2000
-            </p>
+            <div className="flex items-center justify-between mt-1">
+              <FieldError field="concern" />
+              <p className="text-[11px] text-muted">
+                {form.concern.length}/2000
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

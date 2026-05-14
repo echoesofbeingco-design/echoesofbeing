@@ -1,0 +1,107 @@
+import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
+
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const key = SESSION_SECRET ? new TextEncoder().encode(SESSION_SECRET) : null;
+
+// ── DDoS / global rate limit (per IP) ──────────────────────────────────────
+// Simple in-memory global limiter: 200 requests/minute per IP
+const globalHits = new Map<string, { count: number; resetAt: number }>();
+
+function globalRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = globalHits.get(ip);
+
+  if (!entry || now > entry.resetAt) {
+    globalHits.set(ip, { count: 1, resetAt: now + 60_000 });
+    return false; // not limited
+  }
+
+  entry.count++;
+  if (entry.count > 200) return true; // limited
+  return false;
+}
+
+// Clean up every 2 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of globalHits.entries()) {
+    if (now > entry.resetAt) globalHits.delete(ip);
+  }
+}, 120_000);
+
+// ── Routes that require authentication ─────────────────────────────────────
+const PROTECTED_PATHS = ["/community/new", "/community/profile"];
+
+// Auth pages — redirect to community if already logged in
+const AUTH_PATHS = ["/auth/login", "/auth/signup"];
+
+export async function middleware(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+
+  // Global DDoS rate limit
+  if (globalRateLimit(ip)) {
+    return new NextResponse("Too Many Requests", { status: 429 });
+  }
+
+  const { pathname } = request.nextUrl;
+
+  // Add security headers to all responses
+  const response = NextResponse.next();
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()"
+  );
+
+  // Check if path requires auth
+  const needsAuth = PROTECTED_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
+  const isAuthPage = AUTH_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
+
+  if (!needsAuth && !isAuthPage) return response;
+
+  // Verify session
+  const sessionCookie = request.cookies.get("eob_session")?.value;
+  let isAuthenticated = false;
+
+  if (sessionCookie && key) {
+    try {
+      await jwtVerify(sessionCookie, key, { algorithms: ["HS256"] });
+      isAuthenticated = true;
+    } catch {
+      // Invalid or expired token
+    }
+  }
+
+  // Redirect unauthenticated users from protected pages to login
+  if (needsAuth && !isAuthenticated) {
+    const loginUrl = new URL("/auth/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Redirect authenticated users away from auth pages
+  if (isAuthPage && isAuthenticated) {
+    return NextResponse.redirect(new URL("/community", request.url));
+  }
+
+  return response;
+}
+
+export const config = {
+  matcher: [
+    "/community/:path*",
+    "/auth/:path*",
+    "/api/community/:path*",
+    "/api/auth/:path*",
+  ],
+};
