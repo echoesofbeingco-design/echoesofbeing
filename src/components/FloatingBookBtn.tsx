@@ -1,30 +1,57 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-export default function FloatingBookBtn() {
-  const [hidden, setHidden] = useState(false);
+const HIDDEN_PATHS = ["/book", "/auth/login", "/auth/signup"];
 
+export default function FloatingBookBtn() {
+  const pathname = usePathname();
+  const [footerVisible, setFooterVisible] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Hide on booking and auth pages
+  const onHiddenPage = HIDDEN_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
+
+  // Listen for mobile nav open/close
   useEffect(() => {
+    function handleNavToggle(e: Event) {
+      setMobileNavOpen((e as CustomEvent).detail?.open ?? false);
+    }
+
+    window.addEventListener("mobile-nav-toggle", handleNavToggle);
+    return () =>
+      window.removeEventListener("mobile-nav-toggle", handleNavToggle);
+  }, []);
+
+  // Footer visibility
+  useEffect(() => {
+    if (onHiddenPage) return;
+
     function handleScroll() {
       const footer = document.querySelector("footer");
       if (!footer) return;
 
       const footerRect = footer.getBoundingClientRect();
-      // Hide when footer is visible in the viewport
-      setHidden(footerRect.top < window.innerHeight - 20);
+      setFooterVisible(footerRect.top < window.innerHeight - 20);
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // initial check
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [onHiddenPage]);
+
+  if (onHiddenPage) return null;
+
+  const shouldHide = footerVisible || mobileNavOpen;
 
   return (
     <div
       className={`md:hidden fixed bottom-6 right-6 z-40 transition-all duration-300 ${
-        hidden
+        shouldHide
           ? "translate-y-20 opacity-0 pointer-events-none"
           : "translate-y-0 opacity-100"
       }`}

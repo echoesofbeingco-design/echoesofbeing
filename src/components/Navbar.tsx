@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "@/components/AuthProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, loading } = useAuth();
+
+  const toggleMobileNav = useCallback((open: boolean) => {
+    setMobileOpen(open);
+    window.dispatchEvent(
+      new CustomEvent("mobile-nav-toggle", { detail: { open } })
+    );
+  }, []);
 
   return (
     <header className="sticky top-0 z-50">
@@ -107,7 +114,7 @@ export default function Navbar() {
 
           {/* Mobile hamburger  */}
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => toggleMobileNav(!mobileOpen)}
             className="md:hidden flex flex-col gap-1.5 p-2"
             aria-label="Toggle menu"
           >
@@ -134,28 +141,28 @@ export default function Navbar() {
           <div className="md:hidden border-t border-border px-6 py-4 flex flex-col gap-4 bg-cream/95 backdrop-blur-md">
             <Link
               href="/services"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => toggleMobileNav(false)}
               className="text-sm py-2"
             >
               Services
             </Link>
             <Link
               href="/blog"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => toggleMobileNav(false)}
               className="text-sm py-2"
             >
               Blog
             </Link>
             <Link
               href="/community"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => toggleMobileNav(false)}
               className="text-sm py-2"
             >
               Community
             </Link>
             <Link
               href="/about"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => toggleMobileNav(false)}
               className="text-sm py-2"
             >
               About
@@ -167,7 +174,7 @@ export default function Navbar() {
                 {user ? (
                   <Link
                     href="/community/profile"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() => toggleMobileNav(false)}
                     className="flex items-center gap-3 py-2 border-t border-border mt-1 pt-4 text-sm text-muted hover:text-sage-600 transition-colors"
                   >
                     <svg
@@ -188,7 +195,7 @@ export default function Navbar() {
                 ) : (
                   <Link
                     href="/auth/login"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() => toggleMobileNav(false)}
                     className="text-sm py-2 text-sage-600 font-medium"
                   >
                     Log in / Sign up
@@ -199,7 +206,7 @@ export default function Navbar() {
 
             <Link
               href="/book"
-              onClick={() => setMobileOpen(false)}
+              onClick={() => toggleMobileNav(false)}
               className="text-sm bg-sage-600 text-cream px-5 py-2.5 rounded-full text-center hover:bg-sage-700 transition-all duration-300"
             >
               Book a session
