@@ -85,7 +85,7 @@ function userSlotReservedEmail(booking: Record<string, unknown>) {
           </ul>
         </div>
         <p style="font-size: 13px; color: #5a6055; line-height: 1.7;">
-          If you have any questions, simply reply to this email or reach out on WhatsApp.
+          If you have any questions, reach out to us at <a href="mailto:echoesofbeing.co@gmail.com" style="color: #617962; text-decoration: underline;">echoesofbeing.co@gmail.com</a>
         </p>
         <p style="font-size: 13px; color: #5a6055; margin-top: 24px;">
           With care,<br/>

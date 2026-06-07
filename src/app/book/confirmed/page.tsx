@@ -99,7 +99,8 @@ function ConfirmedContent() {
             <span className="font-medium text-forest">Please note:</span> Your
             slot is temporarily reserved, not yet confirmed. It will be finalized
             once payment is verified. If you have any questions, feel free to
-            reach out on WhatsApp or reply to the email you will receive.
+            email us at{" "}
+            <a href="mailto:echoesofbeing.co@gmail.com" className="text-sage-600 underline hover:text-forest transition-colors">echoesofbeing.co@gmail.com</a>
           </p>
         </div>
       </div>
