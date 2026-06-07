@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "echoesofbeing.co@gmail.com";
-const FROM_EMAIL = "Echos of Being <hello@echoesofbeing.co.in>";
+const FROM_ADDRESS = process.env.EMAIL_FROM || "noreply@echoesofbeing.co.in";
+const FROM_EMAIL = `Echos of Being <${FROM_ADDRESS}>`;
 
 export async function POST(req: Request) {
   try {

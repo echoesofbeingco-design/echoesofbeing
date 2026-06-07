@@ -54,12 +54,15 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
     });
 
-    // Send email
+    // Send email — use explicit APP_URL, then Vercel's auto URL, then production domain
     const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : "https://www.echoesofbeing.co.in");
     const resetLink = `${appUrl}/auth/reset-password?token=${rawToken}`;
-    const fromEmail =
-      process.env.EMAIL_FROM || "Echos of Being <hello@echoesofbeing.co.in>";
+    const fromAddress = process.env.EMAIL_FROM || "noreply@echoesofbeing.co.in";
+    const fromEmail = `Echos of Being <${fromAddress}>`;
 
     const { error: emailError } = await resend.emails.send({
       from: fromEmail,

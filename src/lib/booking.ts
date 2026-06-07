@@ -1,16 +1,3 @@
-import { db } from "./firebase";
-import {
-  collection,
-  addDoc,
-  doc,
-  updateDoc,
-  getDoc,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-} from "firebase/firestore";
-
 export interface BookingData {
   name: string;
   email: string;
@@ -42,85 +29,50 @@ export type BookingStatus =
   | "payment_verified"
   | "confirmed";
 
-export async function createBooking(data: BookingData): Promise<string> {
-  const now = serverTimestamp();
-
-  // 1. Create the booking
-  const bookingRef = await addDoc(collection(db, "bookings"), {
-    ...data,
-    status: "intake_submitted" as BookingStatus,
-    createdAt: now,
-    updatedAt: now,
+async function bookingApi(body: Record<string, unknown>) {
+  const res = await fetch("/api/bookings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
 
-  // 2. Create or link a client record
-  // Check if a client with this email already exists
-  const clientsQuery = query(
-    collection(db, "clients"),
-    where("email", "==", data.email.toLowerCase().trim())
-  );
-  const existingClients = await getDocs(clientsQuery);
+  const data = await res.json();
 
-  if (existingClients.empty) {
-    // Create new client record
-    const clientRef = await addDoc(collection(db, "clients"), {
-      name: data.name,
-      email: data.email.toLowerCase().trim(),
-      whatsapp: data.whatsapp,
-      age: data.age,
-      gender: data.gender,
-      pronouns: data.pronouns,
-      occupation: "",
-      desiredOutcomes: "",
-      status: "active",
-      bookingId: bookingRef.id,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    // Link client back to booking
-    await updateDoc(doc(db, "bookings", bookingRef.id), {
-      clientId: clientRef.id,
-    });
-  } else {
-    // Client exists — link booking to existing client
-    const existingClient = existingClients.docs[0];
-    await updateDoc(doc(db, "bookings", bookingRef.id), {
-      clientId: existingClient.id,
-    });
+  if (!res.ok) {
+    throw new Error(data.error || "Something went wrong");
   }
 
-  return bookingRef.id;
+  return data;
+}
+
+export async function createBooking(data: BookingData): Promise<string> {
+  const result = await bookingApi({ action: "create", ...data });
+  return result.id;
 }
 
 export async function updateBookingCalendly(
   bookingId: string,
   calendly: CalendlyData
 ) {
-  await updateDoc(doc(db, "bookings", bookingId), {
-    calendly,
-    status: "slot_reserved" as BookingStatus,
-    updatedAt: serverTimestamp(),
-  });
+  await bookingApi({ action: "update_calendly", bookingId, calendly });
 }
 
 export async function updateBookingConsent(
   bookingId: string,
   consent: ConsentData
 ) {
-  await updateDoc(doc(db, "bookings", bookingId), {
-    consent,
-    status: "pending_payment" as BookingStatus,
-    updatedAt: serverTimestamp(),
-  });
+  await bookingApi({ action: "update_consent", bookingId, consent });
 }
 
 export async function getBooking(
   bookingId: string
 ): Promise<Record<string, unknown> | null> {
-  const snap = await getDoc(doc(db, "bookings", bookingId));
-  if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() } as Record<string, unknown>;
+  try {
+    const result = await bookingApi({ action: "get", bookingId });
+    return result.booking || null;
+  } catch {
+    return null;
+  }
 }
 
 /* ----------  Aadhaar image upload  ---------- */
@@ -196,8 +148,5 @@ export async function updateBookingAadhar(
   bookingId: string,
   aadhar: AadharUploadResult
 ) {
-  await updateDoc(doc(db, "bookings", bookingId), {
-    aadhar,
-    updatedAt: serverTimestamp(),
-  });
+  await bookingApi({ action: "update_aadhar", bookingId, aadhar });
 }
