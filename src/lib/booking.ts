@@ -5,6 +5,9 @@ import {
   doc,
   updateDoc,
   getDoc,
+  query,
+  where,
+  getDocs,
   serverTimestamp,
 } from "firebase/firestore";
 
@@ -40,13 +43,54 @@ export type BookingStatus =
   | "confirmed";
 
 export async function createBooking(data: BookingData): Promise<string> {
-  const ref = await addDoc(collection(db, "bookings"), {
+  const now = serverTimestamp();
+
+  // 1. Create the booking
+  const bookingRef = await addDoc(collection(db, "bookings"), {
     ...data,
     status: "intake_submitted" as BookingStatus,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
+    createdAt: now,
+    updatedAt: now,
   });
-  return ref.id;
+
+  // 2. Create or link a client record
+  // Check if a client with this email already exists
+  const clientsQuery = query(
+    collection(db, "clients"),
+    where("email", "==", data.email.toLowerCase().trim())
+  );
+  const existingClients = await getDocs(clientsQuery);
+
+  if (existingClients.empty) {
+    // Create new client record
+    const clientRef = await addDoc(collection(db, "clients"), {
+      name: data.name,
+      email: data.email.toLowerCase().trim(),
+      whatsapp: data.whatsapp,
+      age: data.age,
+      gender: data.gender,
+      pronouns: data.pronouns,
+      occupation: "",
+      desiredOutcomes: "",
+      status: "active",
+      bookingId: bookingRef.id,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    // Link client back to booking
+    await updateDoc(doc(db, "bookings", bookingRef.id), {
+      clientId: clientRef.id,
+    });
+  } else {
+    // Client exists — link booking to existing client
+    const existingClient = existingClients.docs[0];
+    await updateDoc(doc(db, "bookings", bookingRef.id), {
+      clientId: existingClient.id,
+    });
+  }
+
+  return bookingRef.id;
 }
 
 export async function updateBookingCalendly(

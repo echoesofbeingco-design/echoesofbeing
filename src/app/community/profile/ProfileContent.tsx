@@ -67,9 +67,16 @@ export default function ProfileContent() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // Delete confirmation
+  // Delete post confirmation
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Delete account
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState("");
 
   const fetchPosts = useCallback(async () => {
     setPostsLoading(true);
@@ -240,6 +247,44 @@ export default function ProfileContent() {
     setLoggingOut(true);
     await logout();
     router.push("/community");
+  }
+
+  // ── Delete Account ──
+  async function handleDeleteAccount() {
+    if (deleteConfirmText !== "DELETE") return;
+    if (!deletePassword.trim()) {
+      setDeleteAccountError("Please enter your password");
+      return;
+    }
+
+    setDeletingAccount(true);
+    setDeleteAccountError("");
+
+    try {
+      const res = await fetch("/api/auth/delete-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: deletePassword,
+          confirmation: deleteConfirmText,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setDeleteAccountError(data.error || "Failed to delete account");
+        return;
+      }
+
+      // Account deleted — redirect to community page
+      router.push("/community");
+      router.refresh();
+    } catch {
+      setDeleteAccountError("Something went wrong. Please try again.");
+    } finally {
+      setDeletingAccount(false);
+    }
   }
 
   // Loading / not logged in
@@ -609,7 +654,7 @@ export default function ProfileContent() {
         </div>
 
         {/* Logout */}
-        <div className="pt-6 border-t border-border">
+        <div className="pt-6 border-t border-border flex items-center justify-between">
           <button
             onClick={() => setShowLogoutModal(true)}
             className="inline-flex items-center gap-2 text-sm text-muted hover:text-red-500 font-medium transition-colors"
@@ -628,6 +673,31 @@ export default function ProfileContent() {
               />
             </svg>
             Log out
+          </button>
+
+          <button
+            onClick={() => {
+              setShowDeleteAccountModal(true);
+              setDeleteConfirmText("");
+              setDeletePassword("");
+              setDeleteAccountError("");
+            }}
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-red-500 font-medium transition-colors"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+              />
+            </svg>
+            Delete my account
           </button>
         </div>
       </section>
@@ -665,7 +735,7 @@ export default function ProfileContent() {
         </div>
       )}
 
-      {/* ── Delete Confirmation Modal ── */}
+      {/* ── Delete Post Confirmation Modal ── */}
       {deletingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -691,6 +761,110 @@ export default function ProfileContent() {
               <button
                 onClick={() => setDeletingId(null)}
                 className="flex-1 border border-border text-forest text-sm py-2.5 rounded-full hover:bg-accent-bg transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Account Confirmation Modal ── */}
+      {showDeleteAccountModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-forest/30 backdrop-blur-sm"
+            onClick={() => !deletingAccount && setShowDeleteAccountModal(false)}
+          />
+          <div className="relative bg-cream border border-border rounded-2xl p-6 md:p-8 max-w-md w-full shadow-xl">
+            {/* Warning icon */}
+            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4 mx-auto">
+              <svg
+                className="w-6 h-6 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                />
+              </svg>
+            </div>
+
+            <h3 className="font-serif text-xl font-medium text-forest mb-2 text-center">
+              Delete your account?
+            </h3>
+            <p className="text-sm text-muted mb-1 text-center">
+              This will permanently delete your account and all your data:
+            </p>
+            <ul className="text-xs text-muted mb-5 space-y-1 list-disc list-inside">
+              <li>All your posts will be removed</li>
+              <li>All your comments will be removed</li>
+              <li>Your votes and reports will be cleared</li>
+              <li>You will not be able to recover this account</li>
+            </ul>
+
+            <div className="space-y-4">
+              {/* Password field */}
+              <div>
+                <label className="text-xs font-semibold tracking-wider uppercase text-muted block mb-1.5">
+                  Enter your password
+                </label>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Your current password"
+                  className="w-full bg-cream-light border border-border rounded-xl px-4 py-2.5 text-forest text-sm focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-shadow"
+                  disabled={deletingAccount}
+                />
+              </div>
+
+              {/* Type DELETE field */}
+              <div>
+                <label className="text-xs font-semibold tracking-wider uppercase text-muted block mb-1.5">
+                  Type <span className="font-mono text-red-500">DELETE</span> to
+                  confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full bg-cream-light border border-border rounded-xl px-4 py-2.5 text-forest text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-400/40 transition-shadow"
+                  disabled={deletingAccount}
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+
+            {deleteAccountError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-2.5 mt-4">
+                {deleteAccountError}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 mt-6">
+              <button
+                onClick={handleDeleteAccount}
+                disabled={
+                  deletingAccount ||
+                  deleteConfirmText !== "DELETE" ||
+                  !deletePassword.trim()
+                }
+                className="flex-1 bg-red-500 text-white text-sm py-2.5 rounded-full hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deletingAccount
+                  ? "Deleting account..."
+                  : "Permanently delete my account"}
+              </button>
+              <button
+                onClick={() => setShowDeleteAccountModal(false)}
+                disabled={deletingAccount}
+                className="flex-1 border border-border text-forest text-sm py-2.5 rounded-full hover:bg-accent-bg transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>

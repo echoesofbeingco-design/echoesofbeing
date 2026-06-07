@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -13,6 +13,30 @@ export default function ResetPasswordForm() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [validating, setValidating] = useState(true);
+  const [tokenError, setTokenError] = useState("");
+
+  // Validate token on page load
+  useEffect(() => {
+    if (!token) {
+      setValidating(false);
+      return;
+    }
+
+    fetch(`/api/auth/reset-password?token=${encodeURIComponent(token)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.valid) {
+          setTokenError(data.error || "This reset link is invalid.");
+        }
+      })
+      .catch(() => {
+        setTokenError("Unable to verify reset link. Please try again.");
+      })
+      .finally(() => {
+        setValidating(false);
+      });
+  }, [token]);
 
   if (!token) {
     return (
@@ -25,6 +49,45 @@ export default function ResetPasswordForm() {
           className="inline-block text-sm text-sage-600 hover:text-sage-700 font-medium transition-colors"
         >
           Request new link
+        </Link>
+      </div>
+    );
+  }
+
+  if (validating) {
+    return (
+      <div className="text-center space-y-4 py-8">
+        <div className="w-8 h-8 border-2 border-sage-300 border-t-sage-600 rounded-full animate-spin mx-auto" />
+        <p className="text-muted text-sm">Verifying reset link...</p>
+      </div>
+    );
+  }
+
+  if (tokenError) {
+    return (
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 mx-auto rounded-full bg-red-50 flex items-center justify-center">
+          <svg
+            className="w-8 h-8 text-red-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+            />
+          </svg>
+        </div>
+        <h2 className="font-serif text-xl font-medium">Link expired</h2>
+        <p className="text-muted text-sm">{tokenError}</p>
+        <Link
+          href="/auth/forgot-password"
+          className="inline-block bg-sage-600 text-cream px-8 py-3 rounded-full text-sm font-medium hover:bg-sage-700 transition-colors duration-300 mt-2"
+        >
+          Request a new link
         </Link>
       </div>
     );

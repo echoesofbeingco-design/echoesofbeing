@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "echoesofbeing.co@gmail.com";
-const FROM_EMAIL = "Echos of Being <onboarding@resend.dev>";
+const FROM_EMAIL = "Echos of Being <hello@echoesofbeing.co.in>";
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const { type, booking } = body;
 
     if (type === "slot_reserved") {
-      await Promise.all([
+      const results = await Promise.allSettled([
         resend.emails.send({
           from: FROM_EMAIL,
           to: booking.email,
@@ -25,6 +25,23 @@ export async function POST(req: Request) {
           html: adminBookingEmail(booking),
         }),
       ]);
+
+      // Log any failures but don't block the booking flow
+      const errors: string[] = [];
+      results.forEach((result, i) => {
+        const label = i === 0 ? "user" : "admin";
+        if (result.status === "rejected") {
+          console.error(`Resend error (${label}):`, result.reason);
+          errors.push(label);
+        } else if (result.value && "error" in result.value && result.value.error) {
+          console.error(`Resend error (${label}):`, result.value.error);
+          errors.push(label);
+        }
+      });
+
+      if (errors.length > 0) {
+        console.warn(`Email sending partially failed for: ${errors.join(", ")}`);
+      }
     }
 
     return NextResponse.json({ success: true });

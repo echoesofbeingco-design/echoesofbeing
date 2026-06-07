@@ -59,9 +59,9 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002";
     const resetLink = `${appUrl}/auth/reset-password?token=${rawToken}`;
     const fromEmail =
-      process.env.EMAIL_FROM || "Echos of Being <onboarding@resend.dev>";
+      process.env.EMAIL_FROM || "Echos of Being <hello@echoesofbeing.co.in>";
 
-    await resend.emails.send({
+    const { error: emailError } = await resend.emails.send({
       from: fromEmail,
       to: email,
       subject: "Reset your password — Echos of Being",
@@ -83,6 +83,14 @@ export async function POST(request: NextRequest) {
         </div>
       `,
     });
+
+    if (emailError) {
+      console.error("Resend error (forgot-password):", emailError);
+      return NextResponse.json(
+        { error: "Failed to send reset email. Please try again later." },
+        { status: 500 }
+      );
+    }
 
     // Mask email for the confirmation message: am***@gmail.com
     const [localPart, domain] = email.split("@");

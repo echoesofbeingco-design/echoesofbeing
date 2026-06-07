@@ -15,6 +15,61 @@ const schema = z.object({
     .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character"),
 });
 
+// GET: Check if a token is still valid (called on page load)
+export async function GET(request: NextRequest) {
+  try {
+    const token = request.nextUrl.searchParams.get("token");
+    if (!token) {
+      return NextResponse.json(
+        { valid: false, error: "No token provided" },
+        { status: 400 }
+      );
+    }
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    const snap = await adminDb
+      .collection("password_reset_tokens")
+      .where("tokenHash", "==", tokenHash)
+      .limit(1)
+      .get();
+
+    if (snap.empty) {
+      return NextResponse.json(
+        { valid: false, error: "This reset link is invalid." },
+        { status: 400 }
+      );
+    }
+
+    const tokenData = snap.docs[0].data();
+
+    if (tokenData.used) {
+      return NextResponse.json(
+        { valid: false, error: "This reset link has already been used. Please request a new one." },
+        { status: 400 }
+      );
+    }
+
+    if (new Date(tokenData.expiresAt) < new Date()) {
+      return NextResponse.json(
+        { valid: false, error: "This reset link has expired. Please request a new one." },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({ valid: true });
+  } catch (error) {
+    console.error("Token validation error:", error);
+    return NextResponse.json(
+      { valid: false, error: "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+
 // POST: Validate token + update password
 export async function POST(request: NextRequest) {
   try {
