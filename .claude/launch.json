@@ -4,8 +4,8 @@
     {
       "name": "echos-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3002"],
-      "port": 3002,
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
       "cwd": "C:\\Users\\HP\\Desktop\\Personal_codes\\EchoesofBeing\\echos-of-being"
     }
   ]

@@ -22,6 +22,7 @@ export async function generateMetadata({
   return {
     title: `${post.title} | Echos of Being`,
     description: post.excerpt,
+    alternates: { canonical: `https://www.echoesofbeing.co.in/blog/${slug}` },
     openGraph: {
       title: post.title,
       description: post.excerpt,

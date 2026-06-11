@@ -17,8 +17,14 @@ export async function generateMetadata({
   const service = getServiceBySlug(slug);
   if (!service) return {};
   return {
-    title: `${service.title} | Echos of Being`,
+    title: `${service.title} Therapy`,
     description: service.description,
+    alternates: { canonical: `https://www.echoesofbeing.co.in/services/${slug}` },
+    openGraph: {
+      title: `${service.title} — Echos of Being`,
+      description: service.description,
+      type: "website",
+    },
   };
 }
 
@@ -31,8 +37,26 @@ export default async function ServiceDetailPage({
   const service = getServiceBySlug(slug);
   if (!service) notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: `${service.title} Therapy`,
+    description: service.description,
+    provider: {
+      "@type": "ProfessionalService",
+      name: "Echos of Being",
+      url: "https://www.echoesofbeing.co.in",
+    },
+    areaServed: { "@type": "Country", name: "India" },
+    serviceType: "Counselling Psychology",
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="relative">
         <div className="h-[320px] md:h-[420px] relative overflow-hidden bg-secondary-bg">
