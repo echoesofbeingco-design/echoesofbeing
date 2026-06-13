@@ -9,6 +9,7 @@ const HIDDEN_PATHS = ["/book", "/auth/login", "/auth/signup"];
 export default function FloatingBookBtn() {
   const pathname = usePathname();
   const [footerVisible, setFooterVisible] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Hide on booking and auth pages
@@ -27,26 +28,42 @@ export default function FloatingBookBtn() {
       window.removeEventListener("mobile-nav-toggle", handleNavToggle);
   }, []);
 
-  // Footer visibility
+  // Scroll-driven visibility: hide while the hero (first section) fills the
+  // screen, reveal once scrolled into the next section, hide again at the footer.
   useEffect(() => {
     if (onHiddenPage) return;
 
     function handleScroll() {
       const footer = document.querySelector("footer");
-      if (!footer) return;
+      if (footer) {
+        const footerRect = footer.getBoundingClientRect();
+        setFooterVisible(footerRect.top < window.innerHeight - 20);
+      }
 
-      const footerRect = footer.getBoundingClientRect();
-      setFooterVisible(footerRect.top < window.innerHeight - 20);
+      // Reveal only after the first section's bottom scrolls into the upper
+      // part of the viewport — i.e. the next section is on screen.
+      const hero = document.querySelector("main section");
+      if (hero) {
+        setPastHero(
+          hero.getBoundingClientRect().bottom < window.innerHeight * 0.4
+        );
+      } else {
+        setPastHero(window.scrollY > window.innerHeight * 0.6);
+      }
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
   }, [onHiddenPage]);
 
   if (onHiddenPage) return null;
 
-  const shouldHide = footerVisible || mobileNavOpen;
+  const shouldHide = footerVisible || mobileNavOpen || !pastHero;
 
   return (
     <div

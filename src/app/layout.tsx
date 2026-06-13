@@ -31,13 +31,17 @@ export const metadata: Metadata = {
   },
   description:
     "A counselling psychology practice offering gentle, confidential, evidence-informed therapy for anxiety, depression, relationships, trauma, and more.",
+  applicationName: "Echoes of Being",
   keywords: [
-    "therapy", "counselling", "psychology", "mental health", "anxiety",
-    "depression", "trauma", "relationships", "self-esteem", "counselling psychologist",
-    "online therapy", "India", "therapy near me",
+    "Echoes of Being", "Nidhi Kishore", "counselling psychologist", "therapist India",
+    "online therapy India", "trauma-informed therapy", "therapy", "counselling",
+    "psychology", "mental health", "anxiety", "depression", "trauma", "relationships",
+    "loneliness", "self-esteem", "online therapy", "therapy near me",
   ],
-  authors: [{ name: "Echoes of Being" }],
+  authors: [{ name: "Nidhi Kishore" }],
   creator: "Echoes of Being",
+  publisher: "Echoes of Being",
+  category: "Health",
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -76,6 +80,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.echoesofbeing.co.in",
   },
+  // Set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION in your env to the code Google
+  // Search Console gives you (the "HTML tag" verification method). When unset,
+  // no tag is rendered.
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default function RootLayout({
@@ -98,16 +108,52 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "ProfessionalService",
-              name: "Echoes of Being",
-              description:
-                "A counselling psychology practice offering gentle, confidential, evidence-informed therapy.",
-              url: "https://www.echoesofbeing.co.in",
-              email: "echoesofbeing.co@gmail.com",
-              areaServed: { "@type": "Country", name: "India" },
-              serviceType: "Counselling Psychology",
-              priceRange: "$$",
-              sameAs: [],
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": "https://www.echoesofbeing.co.in/#website",
+                  url: "https://www.echoesofbeing.co.in",
+                  name: "Echoes of Being",
+                  alternateName: "Echoes of Being Therapy",
+                  description:
+                    "A counselling psychology practice. Gentle, confidential, evidence-informed therapy.",
+                  inLanguage: "en-IN",
+                  publisher: {
+                    "@id": "https://www.echoesofbeing.co.in/#practice",
+                  },
+                },
+                {
+                  "@type": ["ProfessionalService", "MedicalBusiness"],
+                  "@id": "https://www.echoesofbeing.co.in/#practice",
+                  name: "Echoes of Being",
+                  url: "https://www.echoesofbeing.co.in",
+                  description:
+                    "A counselling psychology practice offering gentle, confidential, evidence-informed therapy for anxiety, depression, relationships, trauma, loneliness, and self-esteem.",
+                  email: "echoesofbeing.co@gmail.com",
+                  image: "https://www.echoesofbeing.co.in/og-image.png",
+                  logo: "https://www.echoesofbeing.co.in/og-image.png",
+                  priceRange: "₹₹",
+                  areaServed: { "@type": "Country", name: "India" },
+                  serviceType: "Counselling Psychology",
+                  knowsAbout: [
+                    "Anxiety",
+                    "Depression",
+                    "Relationships",
+                    "Trauma",
+                    "Loneliness",
+                    "Self-esteem",
+                    "Women's mental health",
+                  ],
+                  founder: {
+                    "@type": "Person",
+                    name: "Nidhi Kishore",
+                    jobTitle: "Counselling Psychologist",
+                  },
+                  sameAs: [
+                    "https://www.instagram.com/echoesofbeing.therapy",
+                  ],
+                },
+              ],
             }),
           }}
         />
