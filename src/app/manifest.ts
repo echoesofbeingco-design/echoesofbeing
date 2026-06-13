@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Echos of Being",
-    short_name: "Echos",
+    name: "Echoes of Being",
+    short_name: "Echoes",
     description:
       "A counselling psychology practice. Gentle, confidential, evidence-informed.",
     start_url: "/",

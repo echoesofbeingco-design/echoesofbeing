@@ -15,15 +15,15 @@ export async function generateMetadata({
     const res = await fetch(`${baseUrl}/api/community/posts/${postId}`, {
       cache: "no-store",
     });
-    if (!res.ok) return { title: "Post Not Found | Echos of Being" };
+    if (!res.ok) return { title: "Post Not Found | Echoes of Being" };
 
     const data = await res.json();
     return {
-      title: `${data.post.title} | Community — Echos of Being`,
+      title: `${data.post.title} | Community — Echoes of Being`,
       description: data.post.body.slice(0, 160),
     };
   } catch {
-    return { title: "Community | Echos of Being" };
+    return { title: "Community | Echoes of Being" };
   }
 }
 

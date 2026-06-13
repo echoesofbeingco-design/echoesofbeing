@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import CommunityFeed from "./CommunityFeed";
 
 export const metadata: Metadata = {
-  title: "Community | Echos of Being",
+  title: "Community | Echoes of Being",
   description:
     "A safe space to share your thoughts, find support, and connect with others on their healing journey.",
 };

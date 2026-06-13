@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { COMMUNITY_ENABLED } from "@/lib/features";
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const key = SESSION_SECRET ? new TextEncoder().encode(SESSION_SECRET) : null;
@@ -48,6 +49,17 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  // While the community feature is hidden, 301-redirect its public pages and
+  // the community-only auth pages to the homepage so search engines consolidate
+  // link equity to home and nothing dangles. API routes (/api/community,
+  // /api/auth) are left untouched. Flip COMMUNITY_ENABLED to restore the pages.
+  if (
+    !COMMUNITY_ENABLED &&
+    (pathname.startsWith("/community") || pathname.startsWith("/auth"))
+  ) {
+    return NextResponse.redirect(new URL("/", request.url), 301);
+  }
 
   // Add security headers to all responses
   const response = NextResponse.next();

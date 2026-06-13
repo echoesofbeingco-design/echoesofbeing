@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { COMMUNITY_TOPICS } from "@/data/community-topics";
 import TopicIcon from "@/components/TopicIcon";
+import Reveal from "@/components/Reveal";
 import { getGreeting, getFollowUp } from "@/data/greetings";
 
 interface PreviewComment {
@@ -289,10 +290,12 @@ export default function CommunityFeed() {
         </div>
       ) : (
         <div className="space-y-4">
-          {posts.map((post) => (
-            <article
+          {posts.map((post, i) => (
+            <Reveal
+              as="article"
               key={post._id}
-              className="border border-border rounded-2xl p-6 hover:border-sage-400/40 transition-colors duration-200"
+              delay={(i % 3) * 60}
+              className="border border-border rounded-2xl p-6 hover:border-sage-400/40 transition-colors duration-200 block"
             >
               {/* Topic badge + meta */}
               <div className="flex items-center gap-3 mb-3">
@@ -452,7 +455,7 @@ export default function CommunityFeed() {
                   )}
                 </div>
               )}
-            </article>
+            </Reveal>
           ))}
         </div>
       )}

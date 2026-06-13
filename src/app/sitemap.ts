@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { sanityClient } from "@/lib/sanity";
+import { COMMUNITY_ENABLED } from "@/lib/features";
 
 const BASE_URL = "https://www.echoesofbeing.co.in";
 
@@ -43,17 +44,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/blog`,
+      url: `${BASE_URL}/echoes`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
     },
-    {
-      url: `${BASE_URL}/community`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.6,
-    },
+    // Community is hidden for now — only list it when the feature is enabled.
+    ...(COMMUNITY_ENABLED
+      ? [
+          {
+            url: `${BASE_URL}/community`,
+            lastModified: new Date(),
+            changeFrequency: "daily" as const,
+            priority: 0.6,
+          },
+        ]
+      : []),
     {
       url: `${BASE_URL}/book`,
       lastModified: new Date(),
@@ -76,9 +82,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // Blog post pages (dynamic — auto-updates as posts are published)
+  // Echoes post pages (dynamic — auto-updates as posts are published)
   const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${BASE_URL}/blog/${post.slug}`,
+    url: `${BASE_URL}/echoes/${post.slug}`,
     lastModified: new Date(post.publishedAt),
     changeFrequency: "monthly" as const,
     priority: 0.7,

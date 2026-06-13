@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import ProfileContent from "./ProfileContent";
 
 export const metadata = {
-  title: "My Profile — Echos of Being Community",
+  title: "My Profile — Echoes of Being Community",
   description: "Manage your community profile, posts, and account settings.",
 };
 

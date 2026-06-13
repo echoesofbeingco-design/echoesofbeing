@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { COMMUNITY_ENABLED } from "@/lib/features";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const toggleMobileNav = useCallback((open: boolean) => {
     setMobileOpen(open);
@@ -20,12 +29,18 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50">
       <div className="h-1 bg-sage-600" />
-      <nav className="bg-cream/80 backdrop-blur-md border-b border-border">
+      <nav
+        className={`bg-cream/80 backdrop-blur-md border-b transition-all duration-300 ${
+          scrolled
+            ? "border-border shadow-sm shadow-black/5"
+            : "border-transparent"
+        }`}
+      >
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-sage-600" />
             <span className="font-serif text-lg font-medium tracking-tight">
-              Echos of Being
+              Echoes of Being
             </span>
           </Link>
 
@@ -40,23 +55,25 @@ export default function Navbar() {
               Services
             </Link>
             <Link
-              href="/blog"
+              href="/echoes"
               className={`text-sm transition-colors duration-300 hover:text-sage-600 ${
-                pathname.startsWith("/blog") ? "text-sage-600" : "text-forest"
+                pathname.startsWith("/echoes") ? "text-sage-600" : "text-forest"
               }`}
             >
-              Blog
+              Echoes
             </Link>
-            <Link
-              href="/community"
-              className={`text-sm transition-colors duration-300 hover:text-sage-600 ${
-                pathname.startsWith("/community")
-                  ? "text-sage-600"
-                  : "text-forest"
-              }`}
-            >
-              Community
-            </Link>
+            {COMMUNITY_ENABLED && (
+              <Link
+                href="/community"
+                className={`text-sm transition-colors duration-300 hover:text-sage-600 ${
+                  pathname.startsWith("/community")
+                    ? "text-sage-600"
+                    : "text-forest"
+                }`}
+              >
+                Community
+              </Link>
+            )}
             <Link
               href="/about"
               className={`text-sm transition-colors duration-300 hover:text-sage-600 ${
@@ -67,7 +84,7 @@ export default function Navbar() {
             </Link>
 
             {/* Profile icon or Login link */}
-            {!loading && (
+            {COMMUNITY_ENABLED && !loading && (
               <>
                 {user ? (
                   <Link
@@ -147,19 +164,21 @@ export default function Navbar() {
               Services
             </Link>
             <Link
-              href="/blog"
+              href="/echoes"
               onClick={() => toggleMobileNav(false)}
               className="text-sm py-2"
             >
-              Blog
+              Echoes
             </Link>
-            <Link
-              href="/community"
-              onClick={() => toggleMobileNav(false)}
-              className="text-sm py-2"
-            >
-              Community
-            </Link>
+            {COMMUNITY_ENABLED && (
+              <Link
+                href="/community"
+                onClick={() => toggleMobileNav(false)}
+                className="text-sm py-2"
+              >
+                Community
+              </Link>
+            )}
             <Link
               href="/about"
               onClick={() => toggleMobileNav(false)}
@@ -169,7 +188,7 @@ export default function Navbar() {
             </Link>
 
             {/* Auth in mobile */}
-            {!loading && (
+            {COMMUNITY_ENABLED && !loading && (
               <>
                 {user ? (
                   <Link

@@ -3,6 +3,7 @@ import FadeImage from "@/components/FadeImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { services, getServiceBySlug } from "@/data/services";
+import Reveal from "@/components/Reveal";
 
 export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));
@@ -21,7 +22,7 @@ export async function generateMetadata({
     description: service.description,
     alternates: { canonical: `https://www.echoesofbeing.co.in/services/${slug}` },
     openGraph: {
-      title: `${service.title} — Echos of Being`,
+      title: `${service.title} — Echoes of Being`,
       description: service.description,
       type: "website",
     },
@@ -44,7 +45,7 @@ export default async function ServiceDetailPage({
     description: service.description,
     provider: {
       "@type": "ProfessionalService",
-      name: "Echos of Being",
+      name: "Echoes of Being",
       url: "https://www.echoesofbeing.co.in",
     },
     areaServed: { "@type": "Country", name: "India" },
@@ -106,7 +107,7 @@ export default async function ServiceDetailPage({
       <section className="max-w-3xl mx-auto px-6 py-16 md:py-24">
         <div className="space-y-16">
           {service.sections.map((section, i) => (
-            <div key={i} className="group">
+            <Reveal key={i} className="group block">
               <div className="flex items-start gap-5">
                 <div className="hidden md:block mt-2 w-8 h-8 rounded-full bg-secondary-bg flex-shrink-0 group-hover:bg-sage-400/40 transition-colors duration-300" />
                 <div>
@@ -118,22 +119,22 @@ export default async function ServiceDetailPage({
                   </p>
                 </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
 
         {/* Closing */}
-        <div className="mt-20 pt-10 border-t border-border">
+        <Reveal className="mt-20 pt-10 border-t border-border block">
           <blockquote className="font-serif text-xl md:text-2xl leading-relaxed text-forest/80 italic">
             &ldquo;{service.closing}&rdquo;
           </blockquote>
-        </div>
+        </Reveal>
       </section>
 
       {/* CTA */}
       <section className="py-12 md:py-16">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="bg-sage-600 rounded-3xl py-14 md:py-16 px-6 text-center">
+          <Reveal y={36} className="bg-sage-600 rounded-3xl py-14 md:py-16 px-6 text-center block">
             <h2 className="font-serif text-2xl md:text-3xl font-medium text-cream mb-3">
               Ready to start?
             </h2>
@@ -160,7 +161,7 @@ export default async function ServiceDetailPage({
                 />
               </svg>
             </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
     </>

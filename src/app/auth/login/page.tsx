@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import LoginForm from "./LoginForm";
 
 export const metadata: Metadata = {
-  title: "Log In | Echos of Being",
-  description: "Log in to the Echos of Being community.",
+  title: "Log In | Echoes of Being",
+  description: "Log in to the Echoes of Being community.",
 };
 
 export default function LoginPage() {

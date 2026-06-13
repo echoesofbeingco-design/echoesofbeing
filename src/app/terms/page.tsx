@@ -1,25 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Reveal from "@/components/Reveal";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | Echos of Being",
+  title: "Terms & Conditions | Echoes of Being",
   description:
-    "Terms of use, privacy practices, and policies for Echos of Being counselling psychology services.",
+    "Terms of use, privacy practices, and policies for Echoes of Being counselling psychology services.",
 };
 
 const sections = [
   {
     title: "1. Introduction",
     content: [
-      "Welcome to Echos of Being. By accessing our website, booking a session, or using any of our services, you agree to be bound by these Terms & Conditions. Please read them carefully before proceeding.",
-      "Echos of Being is a counselling psychology practice offering online therapy and consultation services. These terms govern the relationship between you (the client) and Echos of Being (the practice).",
+      "Welcome to Echoes of Being. By accessing our website, booking a session, or using any of our services, you agree to be bound by these Terms & Conditions. Please read them carefully before proceeding.",
+      "Echoes of Being is a counselling psychology practice offering online therapy and consultation services. These terms govern the relationship between you (the client) and Echoes of Being (the practice).",
       'If you do not agree to these terms, please do not use our website or services. Your continued use of the website constitutes acceptance of these terms in their entirety.',
     ],
   },
   {
     title: "2. Services",
     content: [
-      "Echos of Being provides online counselling and psychotherapy services, including introductory consultations and individual therapy sessions. All sessions are conducted online via secure video platforms.",
+      "Echoes of Being provides online counselling and psychotherapy services, including introductory consultations and individual therapy sessions. All sessions are conducted online via secure video platforms.",
       "Our services are therapeutic in nature and are not a substitute for medical treatment, psychiatric care, or emergency mental health services. We do not prescribe medication or provide medical diagnoses.",
       "The practice reserves the right to modify, suspend, or discontinue any service at any time with reasonable notice to affected clients.",
     ],
@@ -29,7 +30,7 @@ const sections = [
     content: [
       "You must be at least 18 years of age to independently book and attend sessions. Clients under 18 may access services only with the written consent and involvement of a parent or legal guardian.",
       "By booking a session, you confirm that the information you provide is accurate and complete, and that you are seeking services voluntarily.",
-      "Echos of Being reserves the right to decline or discontinue services if, in the therapist's professional judgment, the client's needs fall outside the scope of services offered, or if a referral to another professional would better serve the client.",
+      "Echoes of Being reserves the right to decline or discontinue services if, in the therapist's professional judgment, the client's needs fall outside the scope of services offered, or if a referral to another professional would better serve the client.",
     ],
   },
   {
@@ -97,7 +98,7 @@ const sections = [
   {
     title: "11. Emergency & Crisis Situations",
     content: [
-      "Echos of Being is not an emergency or crisis service. If you are experiencing a mental health emergency, suicidal thoughts, or are in immediate danger, please contact your nearest emergency services, go to the nearest hospital, or call a crisis helpline.",
+      "Echoes of Being is not an emergency or crisis service. If you are experiencing a mental health emergency, suicidal thoughts, or are in immediate danger, please contact your nearest emergency services, go to the nearest hospital, or call a crisis helpline.",
       "Helpful resources in India include: iCall (9152987821), Vandrevala Foundation (1860 2662 345), and AASRA (9820466726).",
       "The therapist may, at their discretion, provide referrals to emergency services or other professionals if they believe you are at risk. This is done in good faith and in accordance with professional ethical obligations.",
     ],
@@ -105,24 +106,24 @@ const sections = [
   {
     title: "12. Limitations & Disclaimers",
     content: [
-      "Echos of Being provides counselling services in good faith and to the best of the therapist's professional ability. However, we do not guarantee specific outcomes or results from therapy.",
+      "Echoes of Being provides counselling services in good faith and to the best of the therapist's professional ability. However, we do not guarantee specific outcomes or results from therapy.",
       "The content on this website, including blog posts, service descriptions, and informational text, is for general informational purposes only and does not constitute professional advice, diagnosis, or treatment.",
-      "Echos of Being shall not be held liable for any direct, indirect, incidental, or consequential damages arising from the use of our website or services, to the fullest extent permitted by law.",
+      "Echoes of Being shall not be held liable for any direct, indirect, incidental, or consequential damages arising from the use of our website or services, to the fullest extent permitted by law.",
       "The website and services are provided on an \"as is\" basis. We make no warranties, express or implied, regarding the availability, accuracy, or reliability of the website.",
     ],
   },
   {
     title: "13. Intellectual Property",
     content: [
-      "All content on this website, including text, graphics, logos, design, and layout, is the property of Echos of Being and is protected by applicable intellectual property laws.",
-      "You may not reproduce, distribute, modify, or create derivative works from any content on this website without prior written consent from Echos of Being.",
+      "All content on this website, including text, graphics, logos, design, and layout, is the property of Echoes of Being and is protected by applicable intellectual property laws.",
+      "You may not reproduce, distribute, modify, or create derivative works from any content on this website without prior written consent from Echoes of Being.",
     ],
   },
   {
     title: "14. Termination of Services",
     content: [
       "Either the client or the therapist may choose to end the therapeutic relationship at any time. If either party wishes to discontinue, reasonable notice is appreciated so that appropriate closure or referral can be arranged.",
-      "Echos of Being reserves the right to terminate services if: (a) the client's behaviour is threatening, abusive, or disruptive; (b) the therapist determines that a referral would be more appropriate; or (c) there is a persistent failure to comply with these terms, including non-payment.",
+      "Echoes of Being reserves the right to terminate services if: (a) the client's behaviour is threatening, abusive, or disruptive; (b) the therapist determines that a referral would be more appropriate; or (c) there is a persistent failure to comply with these terms, including non-payment.",
     ],
   },
   {
@@ -134,14 +135,14 @@ const sections = [
   {
     title: "16. Changes to These Terms",
     content: [
-      "Echos of Being reserves the right to update or modify these Terms & Conditions at any time. Changes will be posted on this page with an updated effective date. Continued use of our website and services after any changes constitutes acceptance of the revised terms.",
+      "Echoes of Being reserves the right to update or modify these Terms & Conditions at any time. Changes will be posted on this page with an updated effective date. Continued use of our website and services after any changes constitutes acceptance of the revised terms.",
       "For significant changes, we will make reasonable efforts to notify existing clients via email.",
     ],
   },
   {
     title: "17. Community Guidelines",
     content: [
-      "The Echos of Being Community is a peer support space for sharing thoughts, experiences, and encouragement. By using the Community, you agree to the following guidelines:",
+      "The Echoes of Being Community is a peer support space for sharing thoughts, experiences, and encouragement. By using the Community, you agree to the following guidelines:",
       "Be respectful and kind. Treat every member with empathy, regardless of their background, identity, or beliefs. This is a safe space for vulnerability.",
       "No hate speech, slurs, or offensive language. Content that is harmful, discriminatory, threatening, or sexually explicit will be automatically removed. This includes content in all languages.",
       "No harassment or bullying. Targeting, mocking, or intimidating other members is strictly prohibited.",
@@ -149,15 +150,15 @@ const sections = [
       "No spam or self-promotion. The Community is for genuine conversation, not advertising or solicitation.",
       "Respect anonymity. Do not attempt to identify anonymous posters or share their information.",
       "Reports are taken seriously. Content that receives multiple reports from community members will be automatically reviewed and may be removed.",
-      "Violations may result in account suspension. Echos of Being reserves the right to suspend or ban accounts that repeatedly violate these guidelines.",
+      "Violations may result in account suspension. Echoes of Being reserves the right to suspend or ban accounts that repeatedly violate these guidelines.",
     ],
   },
   {
     title: "18. User-Generated Content",
     content: [
-      "By posting content on the Echos of Being Community, you grant Echos of Being a non-exclusive, royalty-free licence to display your content within the platform.",
+      "By posting content on the Echoes of Being Community, you grant Echoes of Being a non-exclusive, royalty-free licence to display your content within the platform.",
       "You retain ownership of your content but are responsible for ensuring it does not violate any laws or the rights of others.",
-      "Echos of Being reserves the right to remove any content that violates these terms or Community Guidelines without prior notice.",
+      "Echoes of Being reserves the right to remove any content that violates these terms or Community Guidelines without prior notice.",
       "Anonymous posts are attributed to 'Anonymous' publicly. The identity of anonymous posters is stored securely and is not shared with other users, but may be disclosed to law enforcement if required by Indian law.",
     ],
   },
@@ -165,10 +166,10 @@ const sections = [
     title: "19. Community Account & Security",
     content: [
       "To participate in the Community, you must create an account with a valid email address and password. You are responsible for maintaining the confidentiality of your login credentials.",
-      "Passwords are encrypted using industry-standard hashing (bcrypt). Echos of Being cannot and does not store your password in plain text.",
+      "Passwords are encrypted using industry-standard hashing (bcrypt). Echoes of Being cannot and does not store your password in plain text.",
       "Account actions — including posting, commenting, upvoting, and reporting — are rate-limited to prevent abuse and protect the platform's integrity.",
       "If you forget your password, you may request a one-time reset link sent to your registered email. This link expires after 1 hour and can only be used once.",
-      "Echos of Being implements security measures including DDoS protection, input validation, and session management to protect your account and data.",
+      "Echoes of Being implements security measures including DDoS protection, input validation, and session management to protect your account and data.",
     ],
   },
   {
@@ -184,7 +185,7 @@ export default function TermsPage() {
     <>
       {/* Header */}
       <section className="bg-accent-bg/40 border-b border-border py-20 md:py-28">
-        <div className="max-w-3xl mx-auto px-6">
+        <Reveal className="max-w-3xl mx-auto px-6">
           <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
             Legal
           </span>
@@ -199,7 +200,7 @@ export default function TermsPage() {
           <p className="text-xs text-muted mt-6">
             Last updated: May 2025
           </p>
-        </div>
+        </Reveal>
       </section>
 
       {/* Content */}
@@ -207,8 +208,9 @@ export default function TermsPage() {
         <div className="max-w-3xl mx-auto px-6">
           <div className="space-y-12">
             {sections.map((section) => (
-              <article
+              <Reveal
                 key={section.title}
+                as="article"
                 id={
                   section.title === "17. Community Guidelines"
                     ? "community-guidelines"
@@ -230,13 +232,13 @@ export default function TermsPage() {
                 </div>
                 {section.title === "20. Contact" && (
                   <div className="mt-4 bg-accent-bg/50 rounded-xl p-6">
-                    <p className="text-sm font-medium mb-1">Echos of Being</p>
+                    <p className="text-sm font-medium mb-1">Echoes of Being</p>
                     <p className="text-sm text-muted">
                       echoesofbeing.co@gmail.com
                     </p>
                   </div>
                 )}
-              </article>
+              </Reveal>
             ))}
           </div>
 

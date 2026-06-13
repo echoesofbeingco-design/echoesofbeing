@@ -1,12 +1,12 @@
-# Echos of Being
+# Echoes of Being
 
 > A counselling psychology practice. Gentle, confidential, evidence-informed.
 
-Echos of Being is a therapy practice offering counselling psychology services for individuals navigating emotional challenges. We provide a safe, non-judgmental space for personal growth and healing.
+Echoes of Being is a therapy practice offering counselling psychology services for individuals navigating emotional challenges. We provide a safe, non-judgmental space for personal growth and healing.
 
 ## About
 
-Echos of Being is founded on the belief that therapy should be accessible, gentle, and evidence-informed. We work with individuals dealing with anxiety, depression, relationship difficulties, trauma, loneliness, self-esteem issues, and concerns specific to women's mental health.
+Echoes of Being is founded on the belief that therapy should be accessible, gentle, and evidence-informed. We work with individuals dealing with anxiety, depression, relationship difficulties, trauma, loneliness, self-esteem issues, and concerns specific to women's mental health.
 
 ## Services
 
@@ -20,13 +20,9 @@ We offer therapy for the following areas:
 - **Trauma** — Processing difficult experiences with care and at your own pace
 - **Self-Esteem** — Building a more compassionate and honest relationship with yourself
 
-## Blog
+## Echoes
 
-We publish articles on mental health, therapy insights, and emotional well-being. Visit our blog at https://www.echoesofbeing.co.in/blog for the latest posts.
-
-## Community
-
-A peer-support space where users can share experiences and support each other anonymously. Available at https://www.echoesofbeing.co.in/community
+Short reflections on what it means to be human — notes on mental health, therapy insights, and emotional well-being. Read them at https://www.echoesofbeing.co.in/echoes
 
 ## Booking
 
@@ -42,7 +38,6 @@ To book a session, visit https://www.echoesofbeing.co.in/book
 - Home: https://www.echoesofbeing.co.in
 - About: https://www.echoesofbeing.co.in/about
 - Services: https://www.echoesofbeing.co.in/services
-- Blog: https://www.echoesofbeing.co.in/blog
-- Community: https://www.echoesofbeing.co.in/community
+- Echoes: https://www.echoesofbeing.co.in/echoes
 - Book a Session: https://www.echoesofbeing.co.in/book
 - Terms: https://www.echoesofbeing.co.in/terms

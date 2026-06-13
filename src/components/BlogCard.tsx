@@ -13,7 +13,7 @@ export default function BlogCard({ post }: { post: SanityPost }) {
 
   return (
     <Link
-      href={`/blog/${post.slug.current}`}
+      href={`/echoes/${post.slug.current}`}
       className="group block"
     >
       <article className="border border-border rounded-2xl overflow-hidden bg-cream-light hover:shadow-lg hover:shadow-sage-400/10 transition-all duration-300">

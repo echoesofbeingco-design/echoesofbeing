@@ -16,106 +16,106 @@ export const services: ServiceDetail[] = [
   {
     slug: "relationships",
     title: "Relationships",
-    tagline: "It's not always about the other person.",
+    tagline: "The relationship is usually not the real problem.",
     image: "/services/relationships.webp",
     imageAlt:
       "Two hands gently holding a ceramic mug on a wooden table in warm natural light",
     description:
-      "Sometimes it's not the relationship itself that's the problem. It's the patterns inside it. We work on understanding your part in it, with curiosity, not judgment.",
+      "The fights, the distance, the feeling of not being understood. It is real. But the relationship is usually just where something deeper is showing up. Something we have been carrying much longer than this. Therapy helps us see what that is so we can move from confusion to understanding ourselves better.",
     sections: [
       {
-        heading: "Why patterns matter more than problems",
-        body: "Most people come to therapy saying something like 'my partner doesn't listen' or 'we keep having the same fight.' And while those experiences are real, what often sits underneath is a pattern that started long before this relationship. Maybe you learned early on that closeness means losing yourself. Or that asking for what you need will push people away. These beliefs, often invisible, shape the way you show up in every relationship you have.",
+        heading: "It is not about fixing the relationship",
+        body: "A lot of us grew up watching how the adults around us handled love, conflict, and closeness. We picked up things from that without knowing it. What it means to need someone. Whether it is okay to ask for things. What happens when we get too close. None of that was a decision we made. But it still shows up in how we are with people now. Therapy is a place to understand that, not to be told what we are doing wrong.",
       },
       {
-        heading: "What we explore together",
-        body: "In our sessions, we look at the dynamics you find yourself repeating. The roles you fall into, the things you tolerate that don't sit right, the ways you protect yourself that end up creating distance. We also explore what healthy connection actually looks like for you, not what it's supposed to look like according to anyone else.",
+        heading: "How we work together",
+        body: "There is no single approach that fits everyone. Some of us need space to understand what is happening inside. Some of us need practical tools we can use right away. Most of us need both at different times. Sessions are shaped around that. The way we work together changes as we go, depending on what feels most useful at the time.",
       },
       {
-        heading: "It takes two, but change starts with one",
-        body: "You don't need your partner in the room to start doing meaningful work. Understanding your own attachment style, your triggers, and your needs gives you a clearer sense of what you're bringing to the table. And that clarity changes everything, whether you're trying to repair a relationship or deciding whether it's time to walk away.",
+        heading: "The other person does not need to be here",
+        body: "This is not couples therapy. It is about understanding ourselves better so that our relationships feel less confusing. When we see our own part more clearly, it changes how we show up with everyone. Whether that means staying, repairing, or leaving, the decision comes from a clearer place.",
       },
     ],
     closing:
-      "This work isn't about becoming a better partner for someone else. It's about becoming more honest with yourself about what you need, and learning how to ask for it without guilt.",
+      "Understanding ourselves is where better relationships begin.",
   },
   {
     slug: "loneliness",
     title: "Loneliness",
-    tagline: "You can feel alone in a room full of people.",
+    tagline: "You can be surrounded by people and still feel completely alone.",
     image: "/services/loneliness.webp",
     imageAlt:
       "A person sitting alone on a park bench looking out at a misty morning landscape",
     description:
-      "Loneliness doesn't always look like isolation. Sometimes it sits right in the middle of a full life, surrounded by people, yet deeply unseen.",
+      "Loneliness is not always about being alone. Sometimes it sits right in the middle of a full life. There are people around, conversations happening, a relationship that looks fine from the outside. But inside, something feels missing. A closeness that is not there. A sense of belonging that never quite lands. A feeling that no one really knows what is going on inside us. Therapy helps us understand what kind of loneliness we are actually carrying and what it needs.",
     sections: [
       {
-        heading: "The loneliness nobody talks about",
-        body: "There's a kind of loneliness that has nothing to do with being alone. You might have friends, family, a partner, a social life that looks full from the outside. But inside, there's a quiet gap. A feeling of not being truly known. Of performing connection without actually feeling it. This kind of loneliness is confusing because you can't always explain it, and others might not understand it.",
+        heading: "It shows up in more ways than we expect",
+        body: "Most of us think loneliness means not having people around. But that is only one version of it. There is the kind where we have people in our life but no one who really knows us. The kind where we have one close person but no sense of belonging to anything larger. There is a loneliness that has nothing to do with people at all, where life itself feels empty or purposeless even when everything looks fine. And then there is feeling alone inside a relationship, sitting next to someone and still feeling unseen. None of these are the same thing. But they all feel like loneliness, and that can be confusing.",
       },
       {
-        heading: "Where it often begins",
-        body: "For many people, this feeling has roots in childhood. Maybe you grew up in a home where emotions weren't welcome. Or where you had to be a certain way to earn love. Over time, you learned to hide the parts of you that felt too much, too messy, or not enough. And now, even in your closest relationships, those parts stay hidden. The result is a kind of emotional distance that follows you everywhere.",
+        heading: "How we work together",
+        body: "There is no single fix for loneliness because loneliness is not one thing. Sometimes what helps is understanding where the disconnection started, the early experiences that taught us to hide parts of ourselves to be accepted. Sometimes what helps is building specific skills for connection, or working through the anxiety that keeps us from letting people in. Sometimes it is sitting with the deeper question of what we are really looking for. Sessions are shaped around what is actually going on, using whatever approach fits best at the time.",
       },
       {
-        heading: "How therapy helps",
-        body: "Therapy offers something rare: a space where you can be fully seen without performing. Where you don't have to be interesting, or strong, or fine. We work on reconnecting you with the parts of yourself you've learned to keep quiet, and slowly building the kind of relationships where those parts are welcome.",
+        heading: "It does not mean something is wrong with us",
+        body: "Feeling lonely when the world around us is constantly connected can feel like a personal failure. Like everyone else figured out how to belong and we missed something. But loneliness usually is not about us being broken or not trying hard enough. It is often about something that was missing much earlier, something we learned to live without before we even had words for it. Understanding that changes how we relate to the feeling. It stops being something to fix and starts being something to listen to.",
       },
     ],
     closing:
-      "You don't have to earn belonging. Sometimes it starts with letting yourself be known, one honest conversation at a time.",
+      "Loneliness is not about needing more people. It is about being able to finally be known.",
   },
   {
     slug: "anxiety",
     title: "Anxiety",
-    tagline: "Your mind is trying to protect you. Let's understand how.",
+    tagline: "The worry is not the problem. It is trying to tell us something.",
     image: "/services/anxiety.webp",
     imageAlt:
       "A journal open on a linen cloth with dried lavender sprigs beside it",
     description:
-      "We work on understanding what your anxiety is trying to protect you from, and how to meet uncertainty without being swallowed by it.",
+      "That constant hum in the background. The overthinking, the tightness, the need to have everything under control just to feel okay. Anxiety is exhausting, but it is not random. It usually makes a lot of sense once we understand where it started. Therapy is not about making the anxiety disappear. It is about understanding what it is responding to so it does not have to run the show.",
     sections: [
       {
-        heading: "Anxiety is not a flaw",
-        body: "Anxiety often gets treated like something to fix or silence. But more often than not, it's a signal. It's your nervous system doing exactly what it was designed to do: keep you safe. The problem isn't that you feel anxious. It's that the alarm system is stuck on high, responding to things that aren't actually dangerous as though they are. Understanding this changes the way you relate to your own mind.",
+        heading: "It is not always what it looks like",
+        body: "Anxiety is not always a panic attack or a racing heart. Sometimes it is the quiet kind. The kind that looks like perfectionism, people-pleasing, overworking, or not being able to rest even when nothing is wrong. It can show up as needing to control every outcome, replaying conversations for hours, or a low-level dread that never fully goes away. Most of us do not even call it anxiety. We just say we are stressed, or tired, or that this is just how we are.",
       },
       {
-        heading: "What anxiety can look like",
-        body: "It's not always the obvious panic attack or racing heart. Sometimes it's the constant overthinking, the need to control outcomes, the quiet dread before a social situation, or the inability to rest even when nothing is wrong. It can show up as perfectionism, people-pleasing, procrastination, or an endless loop of 'what if.' These are all ways your mind is trying to manage a world that feels unpredictable.",
+        heading: "Where it usually comes from",
+        body: "Anxiety is not a flaw in how we are wired. It is usually a response that made sense at some point. Maybe we grew up in an environment where things felt unpredictable, or where we had to stay alert to keep things from falling apart. Maybe we learned early that making a mistake meant losing something important. Over time, that alertness became the default. The alarm system got stuck, not because it is broken, but because it never got the signal that it is safe to come down.",
       },
       {
         heading: "What we work on",
-        body: "In therapy, we go beyond just managing symptoms. We look at what's driving the anxiety: the beliefs, the past experiences, the unprocessed emotions underneath. We also build practical tools to help you regulate your nervous system, so that you can start meeting uncertainty with steadiness instead of fear. The goal isn't to never feel anxious. It's to not be run by it.",
+        body: "In therapy, we do more than manage symptoms. We look at what is underneath the anxiety, the beliefs, the memories, the experiences that keep the nervous system on high alert. We also build practical tools to help regulate what is happening in the body, so that meeting uncertainty does not always feel like a threat. The goal is not to never feel anxious. It is to not be controlled by it.",
       },
     ],
     closing:
-      "Anxiety doesn't have to be the loudest voice in the room. With time and support, you can learn to hear it without obeying it.",
+      "Anxiety is not the enemy. It is a part of us that learned to protect us the only way it knew how.",
   },
   {
     slug: "depression",
     title: "Depression",
-    tagline: "When everything feels heavier than it should.",
+    tagline: "Something has felt off for a while now.",
     image: "/services/depression.webp",
     imageAlt:
       "Rain droplets on a window pane with a blurred warm interior behind it",
     description:
-      "When getting through the day feels heavier than it should, therapy can be a space to sit with that honestly, without having to perform being okay.",
+      "Most of us who are going through this do not walk in saying I am depressed. We say something feels off. We say we are tired all the time, or that nothing excites us anymore, or that we are just going through the motions. From the outside, life looks fine. We are working, showing up, getting things done. But inside, something has gone quiet. And we do not know when it happened or how to get it back.",
     sections: [
       {
-        heading: "It doesn't always look the way you think",
-        body: "Depression isn't always lying in bed unable to move. Sometimes it looks like going through the motions, getting things done, showing up, smiling, but feeling hollow underneath. It can feel like a fog that sits over everything, making things that used to matter feel flat or far away. You might not even call it depression. You might just say you're tired, or stuck, or numb.",
+        heading: "It does not always have a name",
+        body: "This is not always the kind of thing that has a clear starting point or an obvious cause. There was no single event, no breakdown, no moment where everything fell apart. It is more like a slow fade. Things that used to matter stopped mattering. We stopped looking forward to things. We started doing everything on autopilot, performing well enough that nobody around us noticed. And after a while we stopped noticing too. We just accepted that this is how life feels now.",
       },
       {
-        heading: "What might be underneath",
-        body: "Depression often carries something deeper than sadness. It can be unexpressed anger, grief that was never given space, years of putting others first, or a sense that nothing you do is ever quite enough. Sometimes it's the body's way of shutting down after running on empty for too long. We explore what your depression might be holding, gently and without rushing.",
+        heading: "What it might actually be about",
+        body: "Sometimes what looks like depression is actually the weight of years of holding it together. For other people, for a career, for a family, for an image of who we are supposed to be. Sometimes it is a loss of meaning, where we look at the life we have built and cannot find ourselves in it anymore. Sometimes it is grief or anger or exhaustion that was never allowed a place. It does not always fit neatly into one explanation, and it does not need to. What matters is that we stop treating it like something to push through and start treating it like something worth understanding.",
       },
       {
-        heading: "A space to stop performing",
-        body: "One of the most healing things therapy can offer is the chance to stop pretending. To say 'I'm not okay' and not have someone try to fix it immediately. We sit with what's real, we name what hasn't been named, and we slowly make room for something lighter. There's no pressure to feel better by a deadline. Healing moves at your pace.",
+        heading: "A place to stop being fine",
+        body: "Therapy for this is not about being told to think positively or given a list of things to try. It is about having a space where we do not have to perform. Where we can say I do not know what is wrong with me and have that be taken seriously instead of brushed aside. We look at what has been building underneath, we work with it using whatever approach actually helps, and we make room for something to shift. At whatever pace feels right.",
       },
     ],
     closing:
-      "You don't have to wait until it gets worse to ask for help. If something feels off, that's enough of a reason to reach out.",
+      "We do not need a crisis to ask for help. If something has felt off for a while, that is reason enough.",
   },
   {
     slug: "for-women",

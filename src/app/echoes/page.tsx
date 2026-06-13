@@ -3,9 +3,9 @@ import { getPosts, getCategories } from "@/lib/sanity-queries";
 import BlogListClient from "./BlogListClient";
 
 export const metadata: Metadata = {
-  title: "Blog | Echos of Being",
+  title: "Echoes | Echoes of Being",
   description:
-    "Reflections on mental health, therapy, relationships, and the quiet work of becoming yourself.",
+    "Short reflections on what it means to be human. Notes on mental health, therapy, relationships, and the quiet work of becoming yourself.",
 };
 
 export const dynamic = "force-dynamic";

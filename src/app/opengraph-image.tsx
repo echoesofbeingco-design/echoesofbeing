@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Echos of Being — A quiet space for therapy";
+export const alt = "Echoes of Being — A quiet space for therapy";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -60,7 +60,7 @@ export default function Image() {
             display: "flex",
           }}
         >
-          Echos of Being
+          Echoes of Being
         </div>
 
         {/* Divider */}

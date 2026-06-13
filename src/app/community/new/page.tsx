@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import NewPostForm from "./NewPostForm";
 
 export const metadata: Metadata = {
-  title: "Share a Thought | Echos of Being Community",
+  title: "Share a Thought | Echoes of Being Community",
 };
 
 export default function NewPostPage() {

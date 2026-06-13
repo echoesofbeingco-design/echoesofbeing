@@ -6,6 +6,7 @@ import { urlFor } from "@/lib/sanity";
 import FadeImage from "@/components/FadeImage";
 import PortableText from "@/components/PortableText";
 import BlogCard from "@/components/BlogCard";
+import Reveal from "@/components/Reveal";
 
 export const dynamic = "force-dynamic";
 
@@ -17,12 +18,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
-  if (!post) return { title: "Post Not Found | Echos of Being" };
+  if (!post) return { title: "Post Not Found | Echoes of Being" };
 
   return {
-    title: `${post.title} | Echos of Being`,
+    title: `${post.title} | Echoes of Being`,
     description: post.excerpt,
-    alternates: { canonical: `https://www.echoesofbeing.co.in/blog/${slug}` },
+    alternates: { canonical: `https://www.echoesofbeing.co.in/echoes/${slug}` },
     openGraph: {
       title: post.title,
       description: post.excerpt,
@@ -74,11 +75,11 @@ export default async function BlogPostPage({
       : undefined,
     author: {
       "@type": "Organization",
-      name: "Echos of Being",
+      name: "Echoes of Being",
     },
     publisher: {
       "@type": "Organization",
-      name: "Echos of Being",
+      name: "Echoes of Being",
     },
     mainEntityOfPage: {
       "@type": "WebPage",
@@ -125,7 +126,7 @@ export default async function BlogPostPage({
         >
           {/* Back link */}
           <Link
-            href="/blog"
+            href="/echoes"
             className="inline-flex items-center gap-2 text-sm text-muted hover:text-sage-600 transition-colors duration-300 mb-6"
           >
             <svg
@@ -141,7 +142,7 @@ export default async function BlogPostPage({
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            Back to journal
+            Back to Echoes
           </Link>
 
           {/* Categories */}
@@ -150,7 +151,7 @@ export default async function BlogPostPage({
               {post.categories.map((cat) => (
                 <Link
                   key={cat._id}
-                  href={`/blog?category=${cat.slug.current}`}
+                  href={`/echoes?category=${cat.slug.current}`}
                   className="text-[11px] font-semibold tracking-wider uppercase text-sage-600 bg-secondary-bg/60 px-3 py-1.5 rounded-full hover:bg-secondary-bg transition-colors duration-200"
                 >
                   {cat.title}
@@ -180,21 +181,23 @@ export default async function BlogPostPage({
 
       {/* ── Body content ── */}
       <section className="max-w-3xl mx-auto px-6 py-16 md:py-20">
-        {post.body && <PortableText value={post.body} />}
+        <Reveal>
+          {post.body && <PortableText value={post.body} />}
+        </Reveal>
 
         {/* Closing divider */}
-        <div className="mt-16 pt-10 border-t border-border">
+        <Reveal className="mt-16 pt-10 border-t border-border block">
           <p className="font-serif text-lg md:text-xl leading-relaxed text-forest/70 italic text-center">
             Thank you for reading. If this resonated with you, I&apos;d love to
             hear from you.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── CTA ── */}
       <section className="py-12 md:py-16">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="bg-sage-600 rounded-3xl py-14 md:py-16 px-6 text-center">
+          <Reveal y={36} className="bg-sage-600 rounded-3xl py-14 md:py-16 px-6 text-center block">
             <h2 className="font-serif text-2xl md:text-3xl font-medium text-cream mb-3">
               Let&apos;s begin a conversation
             </h2>
@@ -221,7 +224,7 @@ export default async function BlogPostPage({
                 />
               </svg>
             </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -229,15 +232,17 @@ export default async function BlogPostPage({
       {relatedPosts.length > 0 && (
         <section className="border-t border-border bg-accent-bg/30">
           <div className="max-w-6xl mx-auto px-6 py-16 md:py-20">
-            <div className="flex items-center gap-3 mb-10">
+            <Reveal className="flex items-center gap-3 mb-10">
               <span className="w-8 h-px bg-sage-600" />
               <span className="text-xs font-semibold tracking-[0.2em] uppercase text-muted">
                 Keep reading
               </span>
-            </div>
+            </Reveal>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedPosts.map((related) => (
-                <BlogCard key={related._id} post={related} />
+              {relatedPosts.map((related, i) => (
+                <Reveal key={related._id} delay={(i % 3) * 90} className="h-full">
+                  <BlogCard post={related} />
+                </Reveal>
               ))}
             </div>
           </div>

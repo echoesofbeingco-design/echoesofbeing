@@ -62,17 +62,17 @@ export async function POST(request: NextRequest) {
         : "https://www.echoesofbeing.co.in");
     const resetLink = `${appUrl}/auth/reset-password?token=${rawToken}`;
     const fromAddress = process.env.EMAIL_FROM || "noreply@echoesofbeing.co.in";
-    const fromEmail = `Echos of Being <${fromAddress}>`;
+    const fromEmail = `Echoes of Being <${fromAddress}>`;
 
     const { error: emailError } = await resend.emails.send({
       from: fromEmail,
       to: email,
-      subject: "Reset your password — Echos of Being",
+      subject: "Reset your password — Echoes of Being",
       html: `
         <div style="font-family: 'Georgia', serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #2d352d;">
           <h2 style="font-size: 22px; font-weight: 500; margin-bottom: 16px;">Reset your password</h2>
           <p style="font-size: 15px; line-height: 1.6; color: #5a6055; margin-bottom: 24px;">
-            We received a request to reset the password for your Echos of Being community account.
+            We received a request to reset the password for your Echoes of Being community account.
             Click the button below to choose a new password.
           </p>
           <a href="${resetLink}" style="display: inline-block; background: #617962; color: #f7f5ec; padding: 12px 32px; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 500;">
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
             This link expires in 1 hour and can only be used once. If you didn't request this, you can safely ignore this email.
           </p>
           <hr style="border: none; border-top: 1px solid #d1d2c7; margin: 28px 0;" />
-          <p style="font-size: 12px; color: #84a284;">Echos of Being</p>
+          <p style="font-size: 12px; color: #84a284;">Echoes of Being</p>
         </div>
       `,
     });

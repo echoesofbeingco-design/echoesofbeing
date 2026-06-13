@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "echoesofbeing.co@gmail.com";
 const FROM_ADDRESS = process.env.EMAIL_FROM || "noreply@echoesofbeing.co.in";
-const FROM_EMAIL = `Echos of Being <${FROM_ADDRESS}>`;
+const FROM_EMAIL = `Echoes of Being <${FROM_ADDRESS}>`;
 
 export async function POST(req: Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
         resend.emails.send({
           from: FROM_EMAIL,
           to: booking.email,
-          subject: "Your slot has been reserved | Echos of Being",
+          subject: "Your slot has been reserved | Echoes of Being",
           html: userSlotReservedEmail(booking),
         }),
         resend.emails.send({
@@ -63,7 +63,7 @@ function userSlotReservedEmail(booking: Record<string, unknown>) {
           Your slot has been reserved.
         </h1>
         <p style="color: #617962; font-size: 14px; margin-bottom: 24px;">
-          Echos of Being
+          Echoes of Being
         </p>
         <p style="font-size: 15px; line-height: 1.7; color: #5a6055;">
           Hi ${booking.name},
@@ -89,7 +89,7 @@ function userSlotReservedEmail(booking: Record<string, unknown>) {
         </p>
         <p style="font-size: 13px; color: #5a6055; margin-top: 24px;">
           With care,<br/>
-          Echos of Being
+          Echoes of Being
         </p>
       </div>
     </div>

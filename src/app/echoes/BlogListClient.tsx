@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import BlogCard from "@/components/BlogCard";
+import Reveal from "@/components/Reveal";
 import type { SanityPost, SanityCategory, PaginatedResult } from "@/lib/sanity";
 
 interface Props {
@@ -36,7 +37,7 @@ export default function BlogListClient({
       if (params.category) url.set("category", params.category);
       if (params.page && params.page > 1) url.set("page", String(params.page));
       const qs = url.toString();
-      router.push(`/blog${qs ? `?${qs}` : ""}`);
+      router.push(`/echoes${qs ? `?${qs}` : ""}`);
     },
     [router]
   );
@@ -81,19 +82,20 @@ export default function BlogListClient({
     <>
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-10 md:pt-20 md:pb-12">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="w-8 h-px bg-sage-600" />
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-muted">
-            Journal
-          </span>
-        </div>
-        <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium leading-tight mb-4">
-          Reflections & Insights
-        </h1>
-        <p className="text-muted max-w-xl leading-relaxed">
-          Thoughts on therapy, mental health, relationships, and the quiet work
-          of becoming yourself.
-        </p>
+        <Reveal>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="w-8 h-px bg-sage-600" />
+            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-muted">
+              Journal
+            </span>
+          </div>
+          <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium leading-tight mb-4">
+            Echoes
+          </h1>
+          <p className="text-muted max-w-xl leading-relaxed">
+            Short reflections on what it means to be human.
+          </p>
+        </Reveal>
       </section>
 
       {/* Search & Filters */}
@@ -195,8 +197,10 @@ export default function BlogListClient({
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.items.map((post) => (
-                <BlogCard key={post._id} post={post} />
+              {posts.items.map((post, i) => (
+                <Reveal key={post._id} delay={(i % 3) * 90} className="h-full">
+                  <BlogCard post={post} />
+                </Reveal>
               ))}
             </div>
 

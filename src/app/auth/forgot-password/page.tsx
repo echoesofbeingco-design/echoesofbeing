@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Forgot Password | Echos of Being",
+  title: "Forgot Password | Echoes of Being",
 };
 
 export default function ForgotPasswordPage() {
