@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
+import SectionBg from "@/components/SectionBg";
 
 export const metadata: Metadata = {
   title: "Services & Fees",
@@ -31,13 +32,20 @@ const plans = [
 export default function ServicesPage() {
   return (
     <>
-      {/* Header */}
-      <section className="bg-accent-bg/40 border-b border-border py-20 md:py-28">
-        <Reveal className="max-w-4xl mx-auto px-6 text-center">
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
+      {/* ──────────  Header  ────────── */}
+      <section className="relative isolate overflow-hidden border-b border-border py-20 md:py-28">
+        <SectionBg variant="sage" />
+        <span
+          aria-hidden
+          className="ghost-heading absolute top-0 left-1/2 -translate-x-1/2 text-[24vw] md:text-[16vw] whitespace-nowrap"
+        >
+          Fees
+        </span>
+        <Reveal className="relative max-w-4xl mx-auto px-6 text-center">
+          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-5">
             Services & fees
           </span>
-          <h1 className="font-serif text-3xl md:text-5xl font-medium leading-tight mb-6">
+          <h1 className="display text-4xl md:text-6xl mb-6">
             Clear, honest pricing.
             <br />
             Sessions shaped to fit.
@@ -49,16 +57,16 @@ export default function ServicesPage() {
         </Reveal>
       </section>
 
-      {/* Pricing cards */}
+      {/* ──────────  Pricing cards  ────────── */}
       <section className="py-20 md:py-28">
         <div className="max-w-4xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             {plans.map((plan, i) => (
               <Reveal key={plan.title} delay={i * 100} className="h-full">
                 <article
-                  className={`h-full rounded-2xl p-8 border transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${
+                  className={`h-full rounded-[1.5rem] p-8 border transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${
                     plan.highlighted
-                      ? "border-sage-500 ring-1 ring-sage-500/20"
+                      ? "border-sage-500 ring-1 ring-sage-500/20 bg-secondary-bg/40"
                       : "border-border hover:border-sage-400/50"
                   }`}
                 >
@@ -73,7 +81,7 @@ export default function ServicesPage() {
                     )}
                   </div>
                   <p className="text-sm text-muted mb-4">{plan.duration}</p>
-                  <p className="font-serif text-2xl text-muted mb-4">
+                  <p className="display text-3xl text-sage-600 mb-4">
                     {plan.price}
                   </p>
                   <p className="text-sm text-muted leading-relaxed">
@@ -85,7 +93,8 @@ export default function ServicesPage() {
           </div>
 
           {/* Payment note */}
-          <Reveal className="bg-accent-bg/50 rounded-2xl p-8 mb-12 block">
+          <Reveal className="relative isolate overflow-hidden rounded-[1.5rem] p-8 mb-12 block">
+            <SectionBg variant="warm" />
             <h3 className="font-serif text-lg font-medium mb-3">Payment</h3>
             <p className="text-sm text-muted leading-relaxed">
               Sessions are paid at the time of booking via bank transfer or UPI.
@@ -97,10 +106,7 @@ export default function ServicesPage() {
 
           {/* CTA */}
           <div className="text-center">
-            <Link
-              href="/book"
-              className="group inline-flex items-center gap-2 bg-sage-600 text-cream px-8 py-3.5 rounded-full text-sm font-medium hover:bg-sage-700 hover:shadow-lg hover:shadow-sage-600/20 transition-all duration-300"
-            >
+            <Link href="/book" className="btn-pill">
               Book a session
               <svg
                 className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
@@ -109,7 +115,11 @@ export default function ServicesPage() {
                 stroke="currentColor"
                 strokeWidth={2}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
               </svg>
             </Link>
           </div>

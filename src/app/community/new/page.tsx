@@ -13,7 +13,7 @@ export default function NewPostPage() {
           Share a thought
         </h1>
         <p className="text-muted leading-relaxed">
-          This is a safe space. Share what&apos;s on your mind — you can choose
+          This is a safe space. Share what&apos;s on your mind, you can choose
           to post anonymously if you prefer.
         </p>
       </div>

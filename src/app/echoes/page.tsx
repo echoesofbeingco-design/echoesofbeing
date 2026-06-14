@@ -5,7 +5,7 @@ import BlogListClient from "./BlogListClient";
 export const metadata: Metadata = {
   title: "Echoes",
   description:
-    "Short reflections on what it means to be human. Notes on mental health, therapy, relationships, and the quiet work of becoming yourself.",
+    "A voice that stays. Honest reflections on the thoughts we replay, the feelings we don't always have words for, and the small things that shape how we see ourselves.",
 };
 
 export const dynamic = "force-dynamic";

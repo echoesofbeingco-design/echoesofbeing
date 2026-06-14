@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       const { error: emailError } = await resend.emails.send({
         from: FROM_EMAIL,
         to: normalizedEmail,
-        subject: "Your verification code — Echoes of Being",
+        subject: "Your verification code from Echoes of Being",
         html: otpEmailHtml(codePlain),
       });
 

@@ -3,7 +3,7 @@ import SignupForm from "./SignupForm";
 
 export const metadata: Metadata = {
   title: "Sign Up",
-  description: "Join the Echoes of Being community — a safe space for healing conversations.",
+  description: "Join the Echoes of Being community, a safe space for healing conversations.",
 };
 
 export default function SignupPage() {

@@ -36,7 +36,7 @@ function ConfirmedContent() {
             />
           </svg>
         </div>
-        <h1 className="font-serif text-3xl md:text-4xl font-medium mb-4">
+        <h1 className="display text-4xl md:text-5xl mb-4">
           Your slot is reserved{name ? `, ${name.split(" ")[0]}` : ""}.
         </h1>
         <p className="text-muted leading-relaxed max-w-md mx-auto">

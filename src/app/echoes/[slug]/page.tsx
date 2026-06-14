@@ -7,6 +7,7 @@ import FadeImage from "@/components/FadeImage";
 import PortableText from "@/components/PortableText";
 import BlogCard from "@/components/BlogCard";
 import Reveal from "@/components/Reveal";
+import ScrollZoom from "@/components/ScrollZoom";
 
 export const dynamic = "force-dynamic";
 
@@ -99,17 +100,19 @@ export default async function BlogPostPage({
         <div className="w-full">
           <div className="max-w-5xl mx-auto px-6 pt-8 md:pt-12">
             <div className="rounded-2xl overflow-hidden aspect-[2/1] md:aspect-[2.4/1] relative bg-secondary-bg">
-              <FadeImage
-                src={urlFor(post.coverImage)
-                  .width(1400)
-                  .height(600)
-                  .quality(85)
-                  .url()}
-                alt={post.coverImage.alt || post.title}
-                fill
-                className="object-cover"
-                priority
-              />
+              <ScrollZoom className="absolute inset-0" from={1.03} to={1.12}>
+                <FadeImage
+                  src={urlFor(post.coverImage)
+                    .width(1400)
+                    .height(600)
+                    .quality(85)
+                    .url()}
+                  alt={post.coverImage.alt || post.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </ScrollZoom>
             </div>
           </div>
         </div>
@@ -161,7 +164,7 @@ export default async function BlogPostPage({
           )}
 
           {/* Title */}
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-[2.75rem] font-medium leading-tight mb-4">
+          <h1 className="display text-3xl md:text-4xl lg:text-[2.75rem] mb-4">
             {post.title}
           </h1>
 
@@ -197,8 +200,8 @@ export default async function BlogPostPage({
       {/* ── CTA ── */}
       <section className="py-12 md:py-16">
         <div className="max-w-3xl mx-auto px-6">
-          <Reveal y={36} className="bg-sage-600 rounded-3xl py-14 md:py-16 px-6 text-center block">
-            <h2 className="font-serif text-2xl md:text-3xl font-medium text-cream mb-3">
+          <Reveal y={36} className="relative isolate overflow-hidden grain bg-sage-600 rounded-[2rem] py-14 md:py-16 px-6 text-center block">
+            <h2 className="display text-3xl md:text-4xl text-cream mb-3">
               Let&apos;s begin a conversation
             </h2>
             <p className="text-cream/80 mb-8 max-w-md mx-auto text-sm">

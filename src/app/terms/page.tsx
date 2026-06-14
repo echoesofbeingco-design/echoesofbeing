@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
+import SectionBg from "@/components/SectionBg";
 import { COMMUNITY_ENABLED } from "@/lib/features";
 
 export const metadata: Metadata = {
@@ -168,7 +169,7 @@ const sections = [
     content: [
       "To participate in the Community, you must create an account with a valid email address and password. You are responsible for maintaining the confidentiality of your login credentials.",
       "Passwords are encrypted using industry-standard hashing (bcrypt). Echoes of Being cannot and does not store your password in plain text.",
-      "Account actions — including posting, commenting, upvoting, and reporting — are rate-limited to prevent abuse and protect the platform's integrity.",
+      "Account actions, including posting, commenting, upvoting, and reporting, are rate-limited to prevent abuse and protect the platform's integrity.",
       "If you forget your password, you may request a one-time reset link sent to your registered email. This link expires after 1 hour and can only be used once.",
       "Echoes of Being implements security measures including DDoS protection, input validation, and session management to protect your account and data.",
     ],
@@ -198,13 +199,20 @@ export default function TermsPage() {
   return (
     <>
       {/* Header */}
-      <section className="bg-accent-bg/40 border-b border-border py-20 md:py-28">
-        <Reveal className="max-w-3xl mx-auto px-6">
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
+      <section className="relative isolate overflow-hidden border-b border-border py-20 md:py-28">
+        <SectionBg variant="sage" />
+        <span
+          aria-hidden
+          className="ghost-heading absolute top-0 left-1/2 -translate-x-1/2 text-[26vw] md:text-[15vw] whitespace-nowrap"
+        >
+          Terms
+        </span>
+        <Reveal className="relative max-w-3xl mx-auto px-6">
+          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-5">
             Legal
           </span>
-          <h1 className="font-serif text-3xl md:text-5xl font-medium leading-tight mb-6">
-            Terms & Conditions
+          <h1 className="display text-4xl md:text-6xl mb-6">
+            Terms &amp; Conditions
           </h1>
           <p className="text-muted max-w-xl">
             Please review these terms carefully. They outline how our practice
@@ -231,7 +239,7 @@ export default function TermsPage() {
                     : undefined
                 }
               >
-                <h2 className="font-serif text-xl md:text-2xl font-medium mb-4">
+                <h2 className="display text-xl md:text-2xl mb-4">
                   {idx + 1}. {section.title.replace(/^\d+\.\s*/, "")}
                 </h2>
                 <div className="space-y-3">
@@ -261,10 +269,7 @@ export default function TermsPage() {
             <p className="text-muted mb-6">
               Ready to take the next step?
             </p>
-            <Link
-              href="/book"
-              className="group inline-flex items-center gap-2 bg-sage-600 text-cream px-8 py-3.5 rounded-full text-sm font-medium hover:bg-sage-700 hover:shadow-lg hover:shadow-sage-600/20 transition-all duration-300"
-            >
+            <Link href="/book" className="btn-pill">
               Book a session
               <svg
                 className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"

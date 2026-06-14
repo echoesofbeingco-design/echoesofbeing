@@ -378,7 +378,7 @@ export default function BookPage() {
           Back to the form
         </button>
 
-        <h1 className="font-serif text-3xl md:text-4xl font-medium mb-6">
+        <h1 className="display text-4xl md:text-5xl mb-6">
           Thank you for reaching out.
         </h1>
 
@@ -399,7 +399,7 @@ export default function BookPage() {
           <div className="bg-accent-bg/50 rounded-2xl p-6 space-y-4 my-2">
             <div>
               <p className="text-forest font-medium">
-                Childline India &mdash;{" "}
+                Childline India:{" "}
                 <a href="tel:1098" className="text-sage-700 underline">
                   1098
                 </a>
@@ -410,7 +410,7 @@ export default function BookPage() {
             </div>
             <div>
               <p className="text-forest font-medium">
-                Tele MANAS (national mental health helpline) &mdash;{" "}
+                Tele MANAS (national mental health helpline):{" "}
                 <a href="tel:14416" className="text-sage-700 underline">
                   14416
                 </a>
@@ -465,7 +465,7 @@ export default function BookPage() {
             </svg>
             Wrong email? Go back
           </button>
-          <h1 className="font-serif text-3xl md:text-4xl font-medium mb-3">
+          <h1 className="display text-4xl md:text-5xl mb-3">
             Confirm your email.
           </h1>
           <p className="text-muted">
@@ -537,7 +537,7 @@ export default function BookPage() {
           <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
             Step 2 of 3
           </span>
-          <h1 className="font-serif text-3xl md:text-4xl font-medium mb-3">
+          <h1 className="display text-4xl md:text-5xl mb-3">
             Choose a time.
           </h1>
           <p className="text-muted max-w-xl mb-2">
@@ -564,7 +564,7 @@ export default function BookPage() {
         <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
           Step 1 of 3
         </span>
-        <h1 className="font-serif text-3xl md:text-4xl font-medium mb-4">
+        <h1 className="display text-4xl md:text-5xl mb-4">
           Tell us a little about yourself.
         </h1>
         <p className="text-muted max-w-xl">

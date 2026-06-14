@@ -6,7 +6,7 @@
 const morningGreetings = [
   "A new morning, a fresh page",
   "The day is still young and gentle",
-  "Good morning — hope you slept okay",
+  "Good morning, hope you slept okay",
   "Soft mornings make for honest words",
   "The morning light is here for you",
   "A quiet start to a new chapter",
@@ -16,7 +16,7 @@ const morningGreetings = [
 const afternoonGreetings = [
   "Taking a breath this afternoon?",
   "The afternoon is a good time to check in",
-  "Halfway through the day — how are you holding up?",
+  "Halfway through the day. How are you holding up?",
   "An afternoon pause can make all the difference",
   "Hope your day has been kind so far",
   "The middle of the day, the middle of the story",
@@ -29,7 +29,7 @@ const eveningGreetings = [
   "Evenings are for the thoughts we carry gently",
   "A quiet evening to sit with what matters",
   "Hope this evening brings you some peace",
-  "The day is done — you showed up, and that counts",
+  "The day is done, you showed up, and that counts",
   "Evenings are softer. Take your time.",
 ];
 
@@ -37,7 +37,7 @@ const nightGreetings = [
   "The night is a safe place for honest thoughts",
   "Late nights and quiet reflections",
   "Can't sleep? You're not the only one",
-  "The world is quieter now — space for your thoughts",
+  "The world is quieter now, space for your thoughts",
   "Night time, your time",
   "Some of the most honest conversations happen after dark",
   "Still up? This is a good place to be",

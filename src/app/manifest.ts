@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Echoes of Being",
     short_name: "Echoes",
     description:
-      "A counselling psychology practice. Gentle, confidential, evidence-informed.",
+      "A counselling psychology practice. Safe, confidential, evidence-informed.",
     start_url: "/",
     display: "standalone",
     background_color: "#f7f5ec",

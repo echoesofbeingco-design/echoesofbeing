@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const { error: emailError } = await resend.emails.send({
       from: fromEmail,
       to: email,
-      subject: "Reset your password — Echoes of Being",
+      subject: "Reset your password for Echoes of Being",
       html: `
         <div style="font-family: 'Georgia', serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #2d352d;">
           <h2 style="font-size: 22px; font-weight: 500; margin-bottom: 16px;">Reset your password</h2>

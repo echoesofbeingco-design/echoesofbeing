@@ -77,9 +77,7 @@ function ConsentContent() {
         <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
           Step 3 of 3
         </span>
-        <h1 className="font-serif text-3xl md:text-4xl font-medium mb-4">
-          One last thing.
-        </h1>
+        <h1 className="display text-4xl md:text-5xl mb-4">One last thing.</h1>
         <p className="text-muted max-w-xl">
           Before we finalize your slot reservation, please review and acknowledge
           the following.

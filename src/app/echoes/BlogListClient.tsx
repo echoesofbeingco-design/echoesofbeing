@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import BlogCard from "@/components/BlogCard";
 import Reveal from "@/components/Reveal";
+import SectionBg from "@/components/SectionBg";
 import type { SanityPost, SanityCategory, PaginatedResult } from "@/lib/sanity";
 
 interface Props {
@@ -81,7 +82,15 @@ export default function BlogListClient({
   return (
     <>
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 pt-16 pb-10 md:pt-20 md:pb-12">
+      <section className="relative isolate overflow-hidden pt-16 pb-10 md:pt-24 md:pb-12">
+        <SectionBg variant="sage" />
+        <span
+          aria-hidden
+          className="ghost-heading absolute top-0 left-1/2 -translate-x-1/2 text-[28vw] md:text-[19vw] whitespace-nowrap"
+        >
+          Echoes
+        </span>
+        <div className="relative max-w-6xl mx-auto px-6">
         <Reveal>
           <div className="flex items-center gap-3 mb-6">
             <span className="w-8 h-px bg-sage-600" />
@@ -89,13 +98,26 @@ export default function BlogListClient({
               Journal
             </span>
           </div>
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-medium leading-tight mb-4">
+          <h1 className="display text-5xl md:text-6xl lg:text-[4.25rem] mb-3">
             Echoes
           </h1>
-          <p className="text-muted max-w-xl leading-relaxed">
-            Short reflections on what it means to be human.
+          <p className="font-serif text-lg md:text-xl text-forest/70 italic">
+            A voice that stays.
           </p>
         </Reveal>
+
+        <Reveal delay={120}>
+          <div className="mt-8 max-w-2xl space-y-4 text-muted leading-relaxed">
+            {[
+              "Think about what an echo really is. You say something out loud in a big, empty space, and a moment later it comes back to you. The sound doesn't just disappear. It lingers. It repeats.",
+              "So much of what we live through works the same way. Something someone said to you years ago. A moment you can't stop going over. The way you talk to yourself when no one is around. These things don't really leave us. They come back quietly, especially when the day goes still. They echo.",
+              "This is the space where I reflect on those echoes. The thoughts we replay, the feelings we don't always have words for, the small everyday things that shape how we see ourselves and the people around us. No big words, no advice. Just honest reflection that might help something inside you feel a little more understood.",
+            ].map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </div>
+        </Reveal>
+        </div>
       </section>
 
       {/* Search & Filters */}

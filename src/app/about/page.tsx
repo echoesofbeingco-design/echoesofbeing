@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Reveal from "@/components/Reveal";
+import SectionBg from "@/components/SectionBg";
+import FadeImage from "@/components/FadeImage";
+import ScrollZoom from "@/components/ScrollZoom";
 
 export const metadata: Metadata = {
   title: "About",
@@ -36,37 +38,29 @@ const sections = [
 
 export default function AboutPage() {
   return (
-    <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start">
-        {/* Image */}
-        <div className="relative md:sticky md:top-24">
-          <Reveal y={36}>
-            <Image
-              src="/about.jpg"
-              alt="A single eucalyptus sprig on warm cream paper"
-              width={500}
-              height={600}
-              className="rounded-2xl object-cover w-full h-[400px] md:h-[520px]"
-              priority
-            />
-          </Reveal>
-        </div>
-
-        {/* Content */}
-        <div>
+    <>
+      {/* ──────────  Hero  ────────── */}
+      <section className="relative isolate overflow-hidden">
+        <SectionBg variant="sage" />
+        <span
+          aria-hidden
+          className="ghost-heading absolute top-0 left-1/2 -translate-x-1/2 text-[26vw] md:text-[19vw] whitespace-nowrap"
+        >
+          About
+        </span>
+        <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-10 md:pt-28 md:pb-14">
           <Reveal>
-            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
+            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-5">
               About the practice
             </span>
-            <h1 className="font-serif text-3xl md:text-4xl font-medium mb-8">
+            <h1 className="display text-5xl md:text-6xl lg:text-[4.25rem] mb-8">
               A little about me.
             </h1>
           </Reveal>
-
           <Reveal delay={120}>
-            <p className="text-muted leading-relaxed">
+            <p className="text-muted leading-relaxed max-w-2xl text-lg">
               I&apos;m{" "}
-              <span className="font-semibold text-forest">Nidhi Kishore</span>, a
+              <span className="font-medium text-forest">Nidhi Kishore</span>, a
               Counselling Psychologist based in Bengaluru. I hold a Master&apos;s
               in Counselling Psychology, and over the last few years I have spent
               more than 1,500 hours sitting with people in counselling. I have
@@ -75,41 +69,72 @@ export default function AboutPage() {
               different.
             </p>
           </Reveal>
-
-          {sections.map((s) => (
-            <Reveal key={s.heading}>
-              <div className="mt-10">
-                <h2 className="font-serif text-xl md:text-2xl font-medium mb-4">
-                  {s.heading}
-                </h2>
-                <div className="space-y-4 text-muted leading-relaxed">
-                  {s.paras.map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
-          ))}
-
-          {/* Details */}
-          <Reveal>
-            <div className="mt-12 pt-8 border-t border-border grid grid-cols-2 gap-8">
-              <div>
-                <span className="text-xs font-semibold tracking-[0.2em] uppercase text-muted block mb-2">
-                  Approach
-                </span>
-                <p className="font-medium">Trauma-informed &middot; Integrative</p>
-              </div>
-              <div>
-                <span className="text-xs font-semibold tracking-[0.2em] uppercase text-muted block mb-2">
-                  Sessions
-                </span>
-                <p className="font-medium">Online &middot; Bengaluru-based</p>
-              </div>
-            </div>
-          </Reveal>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* ──────────  Body: sticky portrait + story  ────────── */}
+      <section className="relative">
+        <div className="max-w-6xl mx-auto px-6 pt-10 md:pt-16 pb-20 md:pb-28">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start">
+            {/* Portrait */}
+            <div className="md:sticky md:top-24">
+              <Reveal y={36}>
+                <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_30px_80px_-30px_rgba(45,53,45,0.4)]">
+                  <ScrollZoom from={1.02} to={1.1}>
+                    <FadeImage
+                      src="/about.jpg"
+                      alt="A single eucalyptus sprig on warm cream paper"
+                      width={500}
+                      height={600}
+                      className="object-cover w-full h-[400px] md:h-[560px]"
+                      priority
+                    />
+                  </ScrollZoom>
+                  <div className="absolute inset-0 bg-gradient-to-t from-sage-700/30 via-transparent to-transparent" />
+                </div>
+              </Reveal>
+            </div>
+
+            {/* Story */}
+            <div>
+              {sections.map((s) => (
+                <Reveal key={s.heading}>
+                  <div className="mt-2 mb-12 last:mb-0">
+                    <h2 className="display text-2xl md:text-3xl mb-5">
+                      {s.heading}
+                    </h2>
+                    <div className="space-y-4 text-muted leading-relaxed">
+                      {s.paras.map((p, i) => (
+                        <p key={i}>{p}</p>
+                      ))}
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+
+              {/* Details */}
+              <Reveal>
+                <div className="mt-12 pt-8 border-t border-border grid grid-cols-2 gap-8">
+                  <div>
+                    <span className="text-xs font-semibold tracking-[0.2em] uppercase text-muted block mb-2">
+                      Approach
+                    </span>
+                    <p className="font-medium">
+                      Trauma-informed &middot; Integrative
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold tracking-[0.2em] uppercase text-muted block mb-2">
+                      Sessions
+                    </span>
+                    <p className="font-medium">Online &middot; Bengaluru-based</p>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

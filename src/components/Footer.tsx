@@ -1,24 +1,26 @@
 import Link from "next/link";
+import SectionBg from "@/components/SectionBg";
 import { COMMUNITY_ENABLED } from "@/lib/features";
 
 export default function Footer() {
   return (
-    <footer>
-      <div className="border-t border-border bg-accent-bg/40">
-        <div className="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-sage-600" />
-              <span className="font-serif text-lg font-medium">
-                Echoes of Being
-              </span>
-            </div>
-            <p className="text-sm text-muted leading-relaxed">
-              A counselling psychology practice. Gentle, confidential,
-              evidence-informed.
-            </p>
-          </div>
+    <footer className="relative isolate overflow-hidden border-t border-border">
+      <SectionBg variant="warm" />
 
+      <div className="relative max-w-6xl mx-auto px-6 pt-16 pb-12">
+        {/* Sign-off */}
+        <div className="mb-14">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="w-2.5 h-2.5 rounded-full bg-sage-600" />
+            <span className="display text-3xl md:text-5xl">Echoes of Being</span>
+          </div>
+          <p className="text-sm text-muted leading-relaxed max-w-md">
+            A counselling psychology practice. Safe, confidential,
+            evidence-informed.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 border-t border-border/70 pt-12">
           <div>
             <h3 className="text-xs font-semibold tracking-widest uppercase mb-4">
               Visit
@@ -103,7 +105,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-border py-6">
+      <div className="relative border-t border-border py-6">
         <p className="text-center text-xs text-muted">
           &copy; {new Date().getFullYear()} Echoes of Being. All rights reserved.
         </p>

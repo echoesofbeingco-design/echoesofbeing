@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s | Echoes of Being",
   },
   description:
-    "A counselling psychology practice offering gentle, confidential, evidence-informed therapy for anxiety, depression, relationships, trauma, and more.",
+    "A counselling psychology practice offering safe, confidential, evidence-informed therapy for anxiety, depression, relationships, trauma, and more.",
   applicationName: "Echoes of Being",
   keywords: [
     "Echoes of Being", "Nidhi Kishore", "counselling psychologist", "therapist India",
@@ -49,13 +49,13 @@ export const metadata: Metadata = {
     siteName: "Echoes of Being",
     title: "Echoes of Being | A quiet space for therapy",
     description:
-      "A counselling psychology practice. Gentle, confidential, evidence-informed therapy for anxiety, depression, relationships, trauma, and more.",
+      "A counselling psychology practice. Safe, confidential, evidence-informed therapy for anxiety, depression, relationships, trauma, and more.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Echoes of Being — A quiet space for therapy",
+        alt: "Echoes of Being, a quiet space for therapy",
       },
     ],
   },
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Echoes of Being | A quiet space for therapy",
     description:
-      "A counselling psychology practice. Gentle, confidential, evidence-informed.",
+      "A counselling psychology practice. Safe, confidential, evidence-informed.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -116,7 +116,7 @@ export default function RootLayout({
                   name: "Echoes of Being",
                   alternateName: "Echoes of Being Therapy",
                   description:
-                    "A counselling psychology practice. Gentle, confidential, evidence-informed therapy.",
+                    "A counselling psychology practice. Safe, confidential, evidence-informed therapy.",
                   inLanguage: "en-IN",
                   publisher: {
                     "@id": "https://www.echoesofbeing.co.in/#practice",
@@ -128,7 +128,7 @@ export default function RootLayout({
                   name: "Echoes of Being",
                   url: "https://www.echoesofbeing.co.in",
                   description:
-                    "A counselling psychology practice offering gentle, confidential, evidence-informed therapy for anxiety, depression, relationships, trauma, loneliness, and self-esteem.",
+                    "A counselling psychology practice offering safe, confidential, evidence-informed therapy for anxiety, depression, relationships, trauma, loneliness, and self-esteem.",
                   email: "echoesofbeing.co@gmail.com",
                   image: "https://www.echoesofbeing.co.in/og-image.png",
                   logo: "https://www.echoesofbeing.co.in/og-image.png",

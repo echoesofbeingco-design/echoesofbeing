@@ -1,6 +1,6 @@
 # Echoes of Being
 
-> A counselling psychology practice. Gentle, confidential, evidence-informed.
+> A counselling psychology practice. Safe, confidential, evidence-informed.
 
 Echoes of Being is a therapy practice offering counselling psychology services for individuals navigating emotional challenges. We provide a safe, non-judgmental space for personal growth and healing.
 
@@ -12,17 +12,17 @@ Echoes of Being is founded on the belief that therapy should be accessible, gent
 
 We offer therapy for the following areas:
 
-- **Relationships** — Understanding patterns, attachment styles, and building healthier connections
-- **Loneliness** — Navigating isolation, social anxiety, and finding belonging
-- **Anxiety** — Working through worry, panic, and overthinking with evidence-based approaches
-- **Depression** — Addressing low mood, motivation, and finding meaning
-- **For Women** — Therapy tailored to challenges women face across life stages
-- **Trauma** — Processing difficult experiences with care and at your own pace
-- **Self-Esteem** — Building a more compassionate and honest relationship with yourself
+- **Relationships**: Understanding patterns, attachment styles, and building healthier connections
+- **Loneliness**: Navigating isolation, social anxiety, and finding belonging
+- **Anxiety**: Working through worry, panic, and overthinking with evidence-based approaches
+- **Depression**: Addressing low mood, motivation, and finding meaning
+- **For Women**: Therapy tailored to challenges women face across life stages
+- **Trauma**: Processing difficult experiences with care and at your own pace
+- **Self-Esteem**: Building a more compassionate and honest relationship with yourself
 
 ## Echoes
 
-Short reflections on what it means to be human — notes on mental health, therapy insights, and emotional well-being. Read them at https://www.echoesofbeing.co.in/echoes
+Short reflections on what it means to be human, notes on mental health, therapy insights, and emotional well-being. Read them at https://www.echoesofbeing.co.in/echoes
 
 ## Booking
 
