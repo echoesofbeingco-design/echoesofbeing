@@ -1,10 +1,5 @@
-import { Resend } from "resend";
 import { NextResponse } from "next/server";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "echoesofbeing.co@gmail.com";
-const FROM_ADDRESS = process.env.EMAIL_FROM || "noreply@echoesofbeing.co.in";
-const FROM_EMAIL = `Echoes of Being <${FROM_ADDRESS}>`;
+import { resend, ADMIN_EMAIL, FROM_EMAIL } from "@/lib/resend";
 
 export async function POST(req: Request) {
   try {
@@ -98,7 +93,6 @@ function userSlotReservedEmail(booking: Record<string, unknown>) {
 
 function adminBookingEmail(booking: Record<string, unknown>) {
   const consent = (booking.consent as Record<string, unknown>) || {};
-  const aadhar = (booking.aadhar as Record<string, unknown>) || {};
   return `
     <div style="font-family: system-ui, sans-serif; max-width: 600px; color: #2d352d;">
       <h2 style="margin-bottom: 16px;">New Booking: ${booking.name}</h2>
@@ -140,21 +134,14 @@ function adminBookingEmail(booking: Record<string, unknown>) {
           <td style="padding: 8px 12px; border: 1px solid #d1d2c7;">${booking.concern || "Not provided"}</td>
         </tr>
         <tr>
+          <td style="padding: 8px 12px; border: 1px solid #d1d2c7; font-weight: 600; background: #f7f5ec;">Email verified</td>
+          <td style="padding: 8px 12px; border: 1px solid #d1d2c7;">${booking.emailVerified ? "Yes ✓" : "No"}</td>
+        </tr>
+        <tr>
           <td style="padding: 8px 12px; border: 1px solid #d1d2c7; font-weight: 600; background: #f7f5ec;">Status</td>
           <td style="padding: 8px 12px; border: 1px solid #d1d2c7;">${booking.status}</td>
         </tr>
       </table>
-      ${
-        aadhar.frontUrl
-          ? `
-        <h3 style="margin-top: 20px;">Aadhaar Card</h3>
-        <div style="font-size: 14px; line-height: 1.8;">
-          <a href="${aadhar.frontUrl}" style="color: #617962; margin-right: 16px;" target="_blank">View Front Side</a>
-          <a href="${aadhar.backUrl}" style="color: #617962;" target="_blank">View Back Side</a>
-        </div>
-      `
-          : ""
-      }
       ${
         consent.paidSession !== undefined
           ? `

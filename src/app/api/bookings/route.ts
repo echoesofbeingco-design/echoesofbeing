@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
         sessionType,
         category,
         concern,
+        termsAccepted,
       } = data;
 
       if (!name || !email || !whatsapp) {
@@ -42,6 +43,8 @@ export async function POST(request: NextRequest) {
         sessionType: sessionType || "",
         category: category || "",
         concern: concern || "",
+        termsAccepted: termsAccepted === true,
+        termsAcceptedAt: termsAccepted === true ? now : null,
         status: "intake_submitted",
         createdAt: now,
         updatedAt: now,
@@ -77,24 +80,6 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json({ id: bookingRef.id });
-    }
-
-    // ── Update Aadhaar data ──
-    if (action === "update_aadhar") {
-      const { bookingId, aadhar } = data;
-      if (!bookingId || !aadhar) {
-        return NextResponse.json(
-          { error: "Missing booking ID or Aadhaar data" },
-          { status: 400 }
-        );
-      }
-
-      await adminDb.collection("bookings").doc(bookingId).update({
-        aadhar,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      return NextResponse.json({ success: true });
     }
 
     // ── Update Calendly data ──

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SignupForm from "./SignupForm";
 
 export const metadata: Metadata = {
-  title: "Sign Up | Echoes of Being",
+  title: "Sign Up",
   description: "Join the Echoes of Being community — a safe space for healing conversations.",
 };
 

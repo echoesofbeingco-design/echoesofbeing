@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
+import { COMMUNITY_ENABLED } from "@/lib/features";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | Echoes of Being",
+  title: "Terms & Conditions",
   description:
     "Terms of use, privacy practices, and policies for Echoes of Being counselling psychology services.",
 };
@@ -28,7 +29,7 @@ const sections = [
   {
     title: "3. Eligibility",
     content: [
-      "You must be at least 18 years of age to independently book and attend sessions. Clients under 18 may access services only with the written consent and involvement of a parent or legal guardian.",
+      "You must be at least 18 years of age to book and attend sessions. We currently work only with adults aged 18 and above and are unable to accept bookings for anyone under 18 at this time. If you are under 18 and need support, please reach out to a trusted adult or a youth helpline such as Childline India (1098) or Tele MANAS (14416).",
       "By booking a session, you confirm that the information you provide is accurate and complete, and that you are seeking services voluntarily.",
       "Echoes of Being reserves the right to decline or discontinue services if, in the therapist's professional judgment, the client's needs fall outside the scope of services offered, or if a referral to another professional would better serve the client.",
     ],
@@ -38,6 +39,7 @@ const sections = [
     content: [
       "Sessions are booked through our website using the online booking system. A booking is considered a request until confirmed by the practice after payment verification.",
       "By completing the intake form, you consent to the collection of the personal information requested, which is used solely for the purpose of providing you with appropriate therapeutic care.",
+      "To confirm that a booking is genuine, we ask you to verify your email address by entering a short code we send to it. Bookings cannot proceed without this verification. We do not require or collect any identity documents.",
       "Session slots are reserved temporarily upon scheduling. Your slot is confirmed only after payment has been received and verified. Unconfirmed bookings may be released.",
     ],
   },
@@ -71,10 +73,9 @@ const sections = [
     title: "8. Data Collection & Privacy",
     content: [
       "We collect personal information through our booking form, including your name, email address, WhatsApp number, age, gender, pronouns, and details about what brings you to therapy. This information is used exclusively for providing and managing your therapeutic care.",
-      "As part of the booking process, you may be asked to upload identity documents (such as Aadhaar card images). These documents are collected solely for verification purposes and are stored securely in encrypted cloud storage.",
-      "Identity documents are automatically deleted from our systems after 30 days of upload. Download links to these documents expire and become inaccessible after deletion.",
+      "To confirm that a booking is genuine, we send a short verification code to your email address, which you enter to confirm it is reachable and belongs to you. We do not collect or store any identity documents (such as Aadhaar or other ID).",
       "We do not sell, trade, or share your personal information with third parties, except as required to provide our services (e.g., email and communication platforms) or as required by law.",
-      "We use the following third-party services to operate: Firebase (data and file storage, by Google), Resend (transactional email), and Calendly (scheduling). Each of these services has its own privacy policy, and your data is subject to their respective terms when processed through their platforms.",
+      "We use the following third-party services to operate: Firebase (data storage, by Google), Resend (transactional email, including verification codes), and Calendly (scheduling). Each of these services has its own privacy policy, and your data is subject to their respective terms when processed through their platforms.",
       "You have the right to request access to, correction of, or deletion of your personal data at any time by contacting us at the email address provided below.",
     ],
   },
@@ -180,6 +181,19 @@ const sections = [
   },
 ];
 
+// The community feature is currently disabled, so its terms (Community
+// Guidelines, User-Generated Content, Community Account & Security) are hidden.
+// They reappear automatically when COMMUNITY_ENABLED is turned back on.
+const COMMUNITY_SECTION_TITLES = new Set([
+  "17. Community Guidelines",
+  "18. User-Generated Content",
+  "19. Community Account & Security",
+]);
+
+const visibleSections = COMMUNITY_ENABLED
+  ? sections
+  : sections.filter((s) => !COMMUNITY_SECTION_TITLES.has(s.title));
+
 export default function TermsPage() {
   return (
     <>
@@ -198,7 +212,7 @@ export default function TermsPage() {
             information.
           </p>
           <p className="text-xs text-muted mt-6">
-            Last updated: May 2025
+            Last updated: June 2026
           </p>
         </Reveal>
       </section>
@@ -207,7 +221,7 @@ export default function TermsPage() {
       <section className="py-16 md:py-24">
         <div className="max-w-3xl mx-auto px-6">
           <div className="space-y-12">
-            {sections.map((section) => (
+            {visibleSections.map((section, idx) => (
               <Reveal
                 key={section.title}
                 as="article"
@@ -218,7 +232,7 @@ export default function TermsPage() {
                 }
               >
                 <h2 className="font-serif text-xl md:text-2xl font-medium mb-4">
-                  {section.title}
+                  {idx + 1}. {section.title.replace(/^\d+\.\s*/, "")}
                 </h2>
                 <div className="space-y-3">
                   {section.content.map((paragraph, i) => (

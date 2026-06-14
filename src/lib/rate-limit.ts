@@ -76,6 +76,9 @@ export const rateLimits = {
   /** Auth routes: 5 requests per minute */
   auth: (ip: string) => rateLimit(`auth:${ip}`, 5, 60_000),
 
+  /** OTP send/verify: 8 requests per minute per IP */
+  otp: (ip: string) => rateLimit(`otp:${ip}`, 8, 60_000),
+
   /** Community reads: 60 requests per minute */
   communityRead: (ip: string) => rateLimit(`comm-r:${ip}`, 60, 60_000),
 

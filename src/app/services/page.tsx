@@ -3,7 +3,7 @@ import Link from "next/link";
 import Reveal from "@/components/Reveal";
 
 export const metadata: Metadata = {
-  title: "Services & Fees | Echoes of Being",
+  title: "Services & Fees",
   description:
     "Clear, honest pricing. Sessions shaped to fit. Individual therapy, couples sessions, and more.",
 };

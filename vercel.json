@@ -1,8 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/cleanup-aadhar",
-      "schedule": "0 3 * * *"
-    }
-  ]
-}
+{}

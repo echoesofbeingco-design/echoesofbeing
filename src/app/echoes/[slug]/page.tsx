@@ -18,10 +18,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
-  if (!post) return { title: "Post Not Found | Echoes of Being" };
+  if (!post) return { title: "Post Not Found" };
 
   return {
-    title: `${post.title} | Echoes of Being`,
+    title: post.title,
     description: post.excerpt,
     alternates: { canonical: `https://www.echoesofbeing.co.in/echoes/${slug}` },
     openGraph: {

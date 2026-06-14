@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   createBooking,
   updateBookingCalendly,
-  uploadAadharImages,
-  updateBookingAadhar,
-  validateAadharFile,
+  sendEmailOtp,
+  verifyEmailOtp,
 } from "@/lib/booking";
 import { showToast } from "@/components/Toast";
 
-type Step = "form" | "calendly";
+type Step = "form" | "verify" | "calendly" | "under18";
 
 const CALENDLY_URL = process.env.NEXT_PUBLIC_CALENDLY_URL!;
 
@@ -76,14 +76,14 @@ export default function BookPage() {
   const [honeypot, setHoneypot] = useState("");
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [aadharFront, setAadharFront] = useState<File | null>(null);
-  const [aadharBack, setAadharBack] = useState<File | null>(null);
-  const [fileErrors, setFileErrors] = useState<{
-    front?: string;
-    back?: string;
-  }>({});
-  const [frontPreview, setFrontPreview] = useState<string | null>(null);
-  const [backPreview, setBackPreview] = useState<string | null>(null);
+  const [agreedTerms, setAgreedTerms] = useState(false);
+
+  // Email verification (OTP) state
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
   function updateField(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -96,6 +96,14 @@ export default function BookPage() {
       });
     }
   }
+
+  /* ----------  Resend cooldown countdown  ---------- */
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   /* ----------  Validation  ---------- */
 
@@ -133,70 +141,15 @@ export default function BookPage() {
     } else if (form.pronouns === "Other" && !pronounsOther.trim()) {
       errors.pronouns = "Please specify your pronouns.";
     }
-    if (!form.concern.trim()) errors.concern = "Please let us know what brings you here.";
+    if (!form.concern.trim())
+      errors.concern = "Please let us know what brings you here.";
     if (!form.sessionType) errors.sessionType = "Please select a session type.";
     if (!form.category) errors.category = "Please select a category.";
-
-    if (!aadharFront || !aadharBack) {
-      if (!aadharFront)
-        setFileErrors((prev) => ({
-          ...prev,
-          front: "Please upload the front side.",
-        }));
-      if (!aadharBack)
-        setFileErrors((prev) => ({
-          ...prev,
-          back: "Please upload the back side.",
-        }));
-    }
+    if (!agreedTerms)
+      errors.terms = "Please accept the Terms & Conditions to continue.";
 
     setFieldErrors(errors);
-    return (
-      Object.keys(errors).length === 0 &&
-      !!aadharFront &&
-      !!aadharBack
-    );
-  }
-
-  /* ----------  File handling  ---------- */
-
-  function handleFileSelect(side: "front" | "back", file: File | null) {
-    if (side === "front" && frontPreview) URL.revokeObjectURL(frontPreview);
-    if (side === "back" && backPreview) URL.revokeObjectURL(backPreview);
-
-    if (!file) {
-      if (side === "front") {
-        setAadharFront(null);
-        setFrontPreview(null);
-      } else {
-        setAadharBack(null);
-        setBackPreview(null);
-      }
-      setFileErrors((prev) => ({ ...prev, [side]: undefined }));
-      return;
-    }
-
-    const error = validateAadharFile(file);
-    if (error) {
-      setFileErrors((prev) => ({ ...prev, [side]: error }));
-      return;
-    }
-
-    setFileErrors((prev) => ({ ...prev, [side]: undefined }));
-    const preview = URL.createObjectURL(file);
-    if (side === "front") {
-      setAadharFront(file);
-      setFrontPreview(preview);
-    } else {
-      setAadharBack(file);
-      setBackPreview(preview);
-    }
-  }
-
-  function formatFileSize(bytes: number) {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return Object.keys(errors).length === 0;
   }
 
   /* ----------  Submit  ---------- */
@@ -206,7 +159,6 @@ export default function BookPage() {
 
     // Honeypot — bots fill this, real users don't see it
     if (honeypot) {
-      // Fake success so the bot doesn't retry
       showToast("Your booking has been submitted.", "success");
       return;
     }
@@ -229,15 +181,20 @@ export default function BookPage() {
     // Validate all fields
     if (!validateForm()) {
       showToast("Please fix the highlighted fields before continuing.", "error");
-      // Scroll to first error
       const firstError = document.querySelector("[data-field-error]");
       firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
+    // Under-18 gate — we only work with adults right now.
+    if (Number(form.age) < 18) {
+      setStep("under18");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     setLoading(true);
     try {
-      // Normalize phone to 10 digits before saving
       const cleanData = {
         ...form,
         name: form.name.trim(),
@@ -250,21 +207,19 @@ export default function BookPage() {
             ? `Other: ${pronounsOther.trim()}`
             : form.pronouns,
         concern: form.concern.trim(),
+        termsAccepted: true,
       };
 
       const id = await createBooking(cleanData);
-
-      // Upload Aadhaar images to Cloudinary
-      const aadharUrls = await uploadAadharImages(
-        id,
-        aadharFront!,
-        aadharBack!
-      );
-      await updateBookingAadhar(id, aadharUrls);
+      const { cooldownMs } = await sendEmailOtp(id, "client", cleanData.email);
 
       markSubmission();
       setBookingId(id);
-      setStep("calendly");
+      setOtpCode("");
+      setOtpError("");
+      setCooldown(Math.ceil((cooldownMs ?? 45000) / 1000));
+      setStep("verify");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       console.error("Booking error:", err);
       showToast(
@@ -275,6 +230,54 @@ export default function BookPage() {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  /* ----------  Email verification  ---------- */
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!bookingId || otpCode.length !== 6) return;
+
+    setVerifying(true);
+    setOtpError("");
+    try {
+      await verifyEmailOtp(
+        bookingId,
+        "client",
+        form.email.trim().toLowerCase(),
+        otpCode
+      );
+      setStep("calendly");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      setOtpError(
+        err instanceof Error ? err.message : "Verification failed. Try again."
+      );
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  async function handleResend() {
+    if (!bookingId || cooldown > 0 || resending) return;
+    setResending(true);
+    setOtpError("");
+    try {
+      const { cooldownMs } = await sendEmailOtp(
+        bookingId,
+        "client",
+        form.email.trim().toLowerCase()
+      );
+      setCooldown(Math.ceil((cooldownMs ?? 45000) / 1000));
+      showToast("A new code is on its way.", "success");
+    } catch (err) {
+      const msg =
+        err instanceof Error ? err.message : "Could not resend the code.";
+      // If the server returned a cooldown, reflect it
+      setOtpError(msg);
+    } finally {
+      setResending(false);
     }
   }
 
@@ -350,12 +353,99 @@ export default function BookPage() {
         : "border-border focus:ring-sage-400/40"
     }`;
 
-  /* ----------  Render: Calendly step  ---------- */
+  /* ----------  Render: Under-18 notice  ---------- */
 
-  if (step === "calendly") {
+  if (step === "under18") {
+    return (
+      <section className="max-w-2xl mx-auto px-6 pt-16 pb-24">
+        <button
+          onClick={() => setStep("form")}
+          className="inline-flex items-center gap-2 text-sm text-muted hover:text-sage-600 transition-colors duration-300 mb-8"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Back to the form
+        </button>
+
+        <h1 className="font-serif text-3xl md:text-4xl font-medium mb-6">
+          Thank you for reaching out.
+        </h1>
+
+        <div className="space-y-5 text-muted leading-relaxed">
+          <p>
+            Right now I work with adults aged eighteen and above, so I am not
+            able to take this booking just yet. Support for younger people is
+            something we hope to bring to Echoes of Being before long, so please
+            do check back with us.
+          </p>
+          <p>
+            In the meantime, please do not let this stop you from finding
+            support, because it is out there and you deserve it. It can really
+            help to talk to a trusted adult. There are also services in India
+            made especially for young people, with people trained to listen.
+          </p>
+
+          <div className="bg-accent-bg/50 rounded-2xl p-6 space-y-4 my-2">
+            <div>
+              <p className="text-forest font-medium">
+                Childline India &mdash;{" "}
+                <a href="tel:1098" className="text-sage-700 underline">
+                  1098
+                </a>
+              </p>
+              <p className="text-sm">
+                Available any time, free of cost.
+              </p>
+            </div>
+            <div>
+              <p className="text-forest font-medium">
+                Tele MANAS (national mental health helpline) &mdash;{" "}
+                <a href="tel:14416" className="text-sage-700 underline">
+                  14416
+                </a>
+              </p>
+              <p className="text-sm">
+                Free and available day and night.
+              </p>
+            </div>
+          </div>
+
+          <p>
+            I hope you find the right space soon. And you are always welcome
+            here, whether that is once you turn eighteen, or sooner if we are
+            able to open this space up.
+          </p>
+        </div>
+
+        <div className="mt-10">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 bg-sage-600 text-cream px-6 py-3 rounded-full text-sm font-medium hover:bg-sage-700 transition-colors duration-300"
+          >
+            Back to home
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
+  /* ----------  Render: Verify step  ---------- */
+
+  if (step === "verify") {
     return (
       <>
-        <section className="max-w-3xl mx-auto px-6 pt-16 pb-4">
+        <section className="max-w-md mx-auto px-6 pt-16 pb-4">
           <button
             onClick={() => setStep("form")}
             className="inline-flex items-center gap-2 text-sm text-muted hover:text-sage-600 transition-colors duration-300 mb-6"
@@ -373,8 +463,77 @@ export default function BookPage() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            Back to form
+            Wrong email? Go back
           </button>
+          <h1 className="font-serif text-3xl md:text-4xl font-medium mb-3">
+            Confirm your email.
+          </h1>
+          <p className="text-muted">
+            We sent a 6-digit code to{" "}
+            <span className="text-forest font-medium">{form.email}</span>. Enter
+            it below to continue.
+          </p>
+        </section>
+
+        <section className="max-w-md mx-auto px-6 pb-20">
+          <form
+            onSubmit={handleVerify}
+            className="border border-border rounded-2xl p-8 space-y-5"
+          >
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              autoFocus
+              value={otpCode}
+              onChange={(e) => {
+                setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6));
+                setOtpError("");
+              }}
+              placeholder="000000"
+              className={`w-full text-center tracking-[0.5em] text-2xl font-medium px-4 py-3.5 rounded-lg border bg-cream-light focus:outline-none focus:ring-2 transition-shadow duration-300 ${
+                otpError
+                  ? "border-red-400 focus:ring-red-300/40"
+                  : "border-border focus:ring-sage-400/40"
+              }`}
+            />
+            {otpError && <p className="text-xs text-red-500">{otpError}</p>}
+
+            <button
+              type="submit"
+              disabled={verifying || otpCode.length !== 6}
+              className="w-full bg-forest text-cream py-3.5 rounded-lg text-sm font-medium hover:bg-sage-700 hover:shadow-lg hover:shadow-sage-600/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {verifying ? "Verifying..." : "Verify & continue"}
+            </button>
+
+            <div className="text-center text-sm text-muted">
+              Didn&apos;t get it?{" "}
+              {cooldown > 0 ? (
+                <span>Resend in {cooldown}s</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resending}
+                  className="text-sage-600 hover:text-sage-700 font-medium underline disabled:opacity-50"
+                >
+                  {resending ? "Sending..." : "Resend code"}
+                </button>
+              )}
+            </div>
+          </form>
+        </section>
+      </>
+    );
+  }
+
+  /* ----------  Render: Calendly step  ---------- */
+
+  if (step === "calendly") {
+    return (
+      <>
+        <section className="max-w-3xl mx-auto px-6 pt-16 pb-4">
           <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
             Step 2 of 3
           </span>
@@ -409,8 +568,8 @@ export default function BookPage() {
           Tell us a little about yourself.
         </h1>
         <p className="text-muted max-w-xl">
-          This helps us understand what brings you here before we meet. Everything
-          you share is kept strictly confidential.
+          This helps us understand what brings you here before we meet.
+          Everything you share is kept strictly confidential.
         </p>
       </section>
 
@@ -421,7 +580,10 @@ export default function BookPage() {
           noValidate
         >
           {/* Honeypot — hidden from real users, bots will fill it */}
-          <div className="absolute -left-[9999px] opacity-0 h-0 overflow-hidden" aria-hidden="true">
+          <div
+            className="absolute -left-[9999px] opacity-0 h-0 overflow-hidden"
+            aria-hidden="true"
+          >
             <label>
               Website
               <input
@@ -481,8 +643,7 @@ export default function BookPage() {
                 maxLength={14}
                 value={form.whatsapp}
                 onChange={(e) => {
-                  // Allow only digits, spaces, dashes
-                  const val = e.target.value.replace(/[^\d\s\-]/g, "");
+                  const val = e.target.value.replace(/[^\d\s-]/g, "");
                   updateField("whatsapp", val);
                 }}
                 placeholder="98765 43210"
@@ -565,7 +726,9 @@ export default function BookPage() {
                 }}
                 className={inputClass("pronouns")}
               >
-                <option value="" disabled>Select</option>
+                <option value="" disabled>
+                  Select
+                </option>
                 <option>She/Her</option>
                 <option>He/Him</option>
                 <option>They/Them</option>
@@ -606,9 +769,7 @@ export default function BookPage() {
             />
             <div className="flex items-center justify-between mt-1">
               <FieldError field="concern" />
-              <p className="text-[11px] text-muted">
-                {form.concern.length}/2000
-              </p>
+              <p className="text-[11px] text-muted">{form.concern.length}/2000</p>
             </div>
           </div>
 
@@ -663,174 +824,39 @@ export default function BookPage() {
             </div>
           </div>
 
-          {/* Aadhaar upload */}
+          {/* Terms acceptance */}
           <div>
-            <label className="text-xs font-semibold tracking-wider uppercase block mb-1">
-              Aadhaar card <span className="text-sage-500">*</span>
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={agreedTerms}
+                onChange={(e) => {
+                  setAgreedTerms(e.target.checked);
+                  if (e.target.checked && fieldErrors.terms) {
+                    setFieldErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.terms;
+                      return next;
+                    });
+                  }
+                }}
+                className="mt-0.5 w-4 h-4 rounded border-border text-sage-600 focus:ring-sage-400/40 flex-shrink-0"
+              />
+              <span className="text-sm text-muted leading-relaxed group-hover:text-forest transition-colors duration-300">
+                I have read and agree to the{" "}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sage-600 underline hover:text-sage-700"
+                >
+                  Terms &amp; Conditions
+                </a>{" "}
+                and the practice&apos;s privacy practices.{" "}
+                <span className="text-sage-500">*</span>
+              </span>
             </label>
-            <p className="text-xs text-muted mb-4">
-              Upload clear images of the front and back. JPG, PNG, or WebP — max
-              5 MB each.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Front side */}
-              <div>
-                {aadharFront && frontPreview ? (
-                  <div className="relative rounded-lg border border-sage-400/50 overflow-hidden bg-cream-light">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={frontPreview}
-                      alt="Aadhaar front"
-                      className="w-full h-36 object-cover"
-                    />
-                    <div className="px-3 py-2 flex items-center justify-between">
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium truncate">
-                          Front side
-                        </p>
-                        <p className="text-[11px] text-muted">
-                          {formatFileSize(aadharFront.size)}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleFileSelect("front", null)}
-                        className="text-muted hover:text-red-500 transition-colors ml-2 flex-shrink-0"
-                        aria-label="Remove front image"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center h-36 rounded-lg border-2 border-dashed border-border hover:border-sage-400/60 bg-cream-light cursor-pointer transition-colors duration-300">
-                    <svg
-                      className="w-8 h-8 text-sage-400 mb-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                      />
-                    </svg>
-                    <span className="text-xs font-medium text-sage-600">
-                      Front side
-                    </span>
-                    <span className="text-[11px] text-muted mt-0.5">
-                      Click to upload
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="hidden"
-                      onChange={(e) =>
-                        handleFileSelect("front", e.target.files?.[0] || null)
-                      }
-                    />
-                  </label>
-                )}
-                {fileErrors.front && (
-                  <p data-field-error className="text-xs text-red-500 mt-1.5">
-                    {fileErrors.front}
-                  </p>
-                )}
-              </div>
-
-              {/* Back side */}
-              <div>
-                {aadharBack && backPreview ? (
-                  <div className="relative rounded-lg border border-sage-400/50 overflow-hidden bg-cream-light">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={backPreview}
-                      alt="Aadhaar back"
-                      className="w-full h-36 object-cover"
-                    />
-                    <div className="px-3 py-2 flex items-center justify-between">
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium truncate">
-                          Back side
-                        </p>
-                        <p className="text-[11px] text-muted">
-                          {formatFileSize(aadharBack.size)}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleFileSelect("back", null)}
-                        className="text-muted hover:text-red-500 transition-colors ml-2 flex-shrink-0"
-                        aria-label="Remove back image"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center h-36 rounded-lg border-2 border-dashed border-border hover:border-sage-400/60 bg-cream-light cursor-pointer transition-colors duration-300">
-                    <svg
-                      className="w-8 h-8 text-sage-400 mb-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                      />
-                    </svg>
-                    <span className="text-xs font-medium text-sage-600">
-                      Back side
-                    </span>
-                    <span className="text-[11px] text-muted mt-0.5">
-                      Click to upload
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="hidden"
-                      onChange={(e) =>
-                        handleFileSelect("back", e.target.files?.[0] || null)
-                      }
-                    />
-                  </label>
-                )}
-                {fileErrors.back && (
-                  <p data-field-error className="text-xs text-red-500 mt-1.5">
-                    {fileErrors.back}
-                  </p>
-                )}
-              </div>
-            </div>
+            <FieldError field="terms" />
           </div>
 
           <button
@@ -838,11 +864,13 @@ export default function BookPage() {
             disabled={loading}
             className="w-full bg-forest text-cream py-3.5 rounded-lg text-sm font-medium hover:bg-sage-700 hover:shadow-lg hover:shadow-sage-600/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Uploading & saving..." : "Continue to scheduling"}
+            {loading ? "Sending verification code..." : "Continue"}
           </button>
 
-          <p className="text-xs text-muted text-center">
-            Your information is kept strictly confidential and encrypted.
+          <p className="text-xs text-muted text-center leading-relaxed">
+            We&apos;ll send a quick confirmation code to your email so we know
+            it&apos;s really you. Your details stay private and are only ever
+            used to arrange your session.
           </p>
         </form>
       </section>

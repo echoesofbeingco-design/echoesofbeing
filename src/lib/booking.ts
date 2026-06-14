@@ -8,6 +8,7 @@ export interface BookingData {
   sessionType: string;
   category: string;
   concern: string;
+  termsAccepted?: boolean;
 }
 
 export interface CalendlyData {
@@ -75,78 +76,38 @@ export async function getBooking(
   }
 }
 
-/* ----------  Aadhaar image upload  ---------- */
+/* ----------  Email verification (OTP)  ---------- */
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export type OtpPurpose = "client" | "guardian";
 
-export function validateAadharFile(file: File): string | null {
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return "Only JPG, PNG, or WebP images are allowed.";
+async function otpApi(body: Record<string, unknown>) {
+  const res = await fetch("/api/otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Something went wrong");
   }
-  if (file.size > MAX_FILE_SIZE) {
-    return "File size must be under 5 MB.";
-  }
-  return null;
+  return data;
 }
 
-export interface AadharUploadResult {
-  frontUrl: string;
-  backUrl: string;
-  frontPublicId: string;
-  backPublicId: string;
-}
-
-export async function uploadAadharImages(
+/** Send a 6-digit verification code to the given email. */
+export async function sendEmailOtp(
   bookingId: string,
-  front: File,
-  back: File
-): Promise<AadharUploadResult> {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-  if (!cloudName || !preset) {
-    throw new Error("Image upload is not configured.");
-  }
-
-  async function uploadOne(file: File, label: string) {
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("upload_preset", preset!);
-    fd.append("folder", `echos-bookings/${bookingId}`);
-    fd.append("public_id", `${label}-${Date.now()}`);
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      { method: "POST", body: fd }
-    );
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(
-        (err as Record<string, Record<string, string>>)?.error?.message ||
-          "Image upload failed"
-      );
-    }
-    return res.json();
-  }
-
-  const [frontData, backData] = await Promise.all([
-    uploadOne(front, "aadhar-front"),
-    uploadOne(back, "aadhar-back"),
-  ]);
-
-  return {
-    frontUrl: frontData.secure_url,
-    backUrl: backData.secure_url,
-    frontPublicId: frontData.public_id,
-    backPublicId: backData.public_id,
-  };
+  purpose: OtpPurpose,
+  email: string
+): Promise<{ cooldownMs?: number }> {
+  return otpApi({ action: "send", bookingId, purpose, email });
 }
 
-export async function updateBookingAadhar(
+/** Verify the code the user entered. Resolves on success, throws on failure. */
+export async function verifyEmailOtp(
   bookingId: string,
-  aadhar: AadharUploadResult
-) {
-  await bookingApi({ action: "update_aadhar", bookingId, aadhar });
+  purpose: OtpPurpose,
+  email: string,
+  code: string
+): Promise<void> {
+  await otpApi({ action: "verify", bookingId, purpose, email, code });
 }
