@@ -49,7 +49,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
             <div>
               <Reveal>
-                <div className="flex items-start gap-3 mb-8">
+                <div className="flex items-start gap-3 mb-6 md:mb-8">
                   <span className="w-8 h-px bg-sage-600 flex-shrink-0 mt-2.5" />
                   <p className="text-sm text-muted">
                     Hi, I&apos;m{" "}
@@ -60,14 +60,31 @@ export default function Home() {
               </Reveal>
 
               <Reveal delay={90}>
-                <h1 className="display text-5xl md:text-6xl lg:text-[4.25rem] mb-8">
+                <h1 className="display text-[2.6rem] sm:text-5xl md:text-6xl lg:text-[4.25rem] mb-5 md:mb-8">
                   You don&apos;t have to{" "}
                   <span className="text-sage-500">figure it all out</span> alone.
                 </h1>
               </Reveal>
 
+              {/* Image — inline on mobile, sits between headline and copy */}
+              <Reveal delay={140} y={28} className="md:hidden block mb-6">
+                <div className="relative overflow-hidden rounded-[1.5rem] shadow-[0_24px_60px_-28px_rgba(45,53,45,0.45)]">
+                  <ScrollZoom from={1.02} to={1.1}>
+                    <Image
+                      src="/hero.jpg"
+                      alt="A serene therapy room with a linen armchair beside a sunlit window"
+                      width={600}
+                      height={400}
+                      className="object-cover w-full h-[280px]"
+                      priority
+                    />
+                  </ScrollZoom>
+                  <div className="absolute inset-0 bg-gradient-to-t from-sage-700/35 via-transparent to-transparent" />
+                </div>
+              </Reveal>
+
               <Reveal delay={180}>
-                <div className="text-muted leading-relaxed mb-8 max-w-lg space-y-4">
+                <div className="text-muted leading-relaxed mb-6 md:mb-8 max-w-lg space-y-4">
                   <p>
                     Most of us understand so much, our work, our world, the
                     people around us, and still find ourselves hard to
@@ -112,7 +129,7 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <div className="relative">
+            <div className="relative hidden md:block">
               <Reveal delay={150} y={36}>
                 <div className="relative overflow-hidden rounded-[1.75rem] shadow-[0_30px_80px_-30px_rgba(45,53,45,0.45)]">
                   <ScrollZoom from={1.02} to={1.1}>
@@ -121,7 +138,7 @@ export default function Home() {
                       alt="A serene therapy room with a linen armchair beside a sunlit window"
                       width={600}
                       height={520}
-                      className="object-cover w-full h-[420px] md:h-[540px]"
+                      className="object-cover w-full h-[540px]"
                       priority
                     />
                   </ScrollZoom>
