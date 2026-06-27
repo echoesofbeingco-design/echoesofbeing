@@ -6,7 +6,6 @@ import { urlFor } from "@/lib/sanity";
 import FadeImage from "@/components/FadeImage";
 import PortableText from "@/components/PortableText";
 import BlogCard from "@/components/BlogCard";
-import Reveal from "@/components/Reveal";
 import ScrollZoom from "@/components/ScrollZoom";
 
 export const dynamic = "force-dynamic";
@@ -182,25 +181,25 @@ export default async function BlogPostPage({
         </div>
       </div>
 
-      {/* ── Body content ── */}
+      {/* ── Body content ──
+          No scroll-reveal animation on the article body: on iOS the
+          IntersectionObserver fade could leave text stuck invisible. */}
       <section className="max-w-3xl mx-auto px-6 py-16 md:py-20">
-        <Reveal>
-          {post.body && <PortableText value={post.body} />}
-        </Reveal>
+        {post.body && <PortableText value={post.body} />}
 
         {/* Closing divider */}
-        <Reveal className="mt-16 pt-10 border-t border-border block">
+        <div className="mt-16 pt-10 border-t border-border">
           <p className="font-serif text-lg md:text-xl leading-relaxed text-forest/70 italic text-center">
             Thank you for reading. If this resonated with you, I&apos;d love to
             hear from you.
           </p>
-        </Reveal>
+        </div>
       </section>
 
       {/* ── CTA ── */}
       <section className="py-12 md:py-16">
         <div className="max-w-3xl mx-auto px-6">
-          <Reveal y={36} className="relative isolate overflow-hidden grain bg-sage-600 rounded-[2rem] py-14 md:py-16 px-6 text-center block">
+          <div className="relative isolate overflow-hidden grain bg-sage-600 rounded-[2rem] py-14 md:py-16 px-6 text-center">
             <h2 className="display text-3xl md:text-4xl text-cream mb-3">
               Let&apos;s begin a conversation
             </h2>
@@ -227,7 +226,7 @@ export default async function BlogPostPage({
                 />
               </svg>
             </Link>
-          </Reveal>
+          </div>
         </div>
       </section>
 
@@ -235,17 +234,17 @@ export default async function BlogPostPage({
       {relatedPosts.length > 0 && (
         <section className="border-t border-border bg-accent-bg/30">
           <div className="max-w-6xl mx-auto px-6 py-16 md:py-20">
-            <Reveal className="flex items-center gap-3 mb-10">
+            <div className="flex items-center gap-3 mb-10">
               <span className="w-8 h-px bg-sage-600" />
               <span className="text-xs font-semibold tracking-[0.2em] uppercase text-muted">
                 Keep reading
               </span>
-            </Reveal>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedPosts.map((related, i) => (
-                <Reveal key={related._id} delay={(i % 3) * 90} className="h-full">
+              {relatedPosts.map((related) => (
+                <div key={related._id} className="h-full">
                   <BlogCard post={related} />
-                </Reveal>
+                </div>
               ))}
             </div>
           </div>
