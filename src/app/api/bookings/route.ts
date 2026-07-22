@@ -26,6 +26,7 @@ import {
   sendBookingEmails,
   sendCancellationEmails,
 } from "@/lib/booking-emails";
+import { sendTelegramAlert } from "@/lib/telegram";
 import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
@@ -324,6 +325,18 @@ async function handleCreate(userId: string, data: Record<string, unknown>) {
     meetLink: calendar?.meetLink ?? null,
   }).catch((error) => console.error("bookings: emails failed", error));
 
+  await sendTelegramAlert({
+    event: "booking_created",
+    client: user.displayName,
+    session: sessionType.label,
+    when: `${formatDateInZone(startMs, config.timezone)} at ${formatTimeInZone(
+      startMs,
+      config.timezone
+    )}`,
+    note: "Booked from the website.",
+    source: "website",
+  }).catch((error) => console.error("bookings: telegram alert failed", error));
+
   await logActivity({
     type: "booking_created",
     message: `New booking — ${user.displayName}, ${formatDateInZone(
@@ -507,6 +520,15 @@ async function handleCancel(userId: string, bookingId: string) {
       cancelledBy: "client",
     }).catch((e) => console.error("bookings: cancellation emails failed", e));
   }
+
+  await sendTelegramAlert({
+    event: "booking_cancelled",
+    client: String(booking.name ?? "A client"),
+    session: String(booking.sessionType ?? "Session"),
+    when: whenLabel,
+    note: "Cancelled by the client. The slot is free again.",
+    source: "website",
+  }).catch((e) => console.error("bookings: telegram alert failed", e));
 
   await logActivity({
     type: "booking_cancelled",
