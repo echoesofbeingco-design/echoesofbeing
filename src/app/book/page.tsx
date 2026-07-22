@@ -1,438 +1,271 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   createBooking,
-  updateBookingCalendly,
-  sendEmailOtp,
-  verifyEmailOtp,
+  getAvailability,
+  type DayAvailability,
+  type SessionTypeOption,
+  type SlotOption,
+  type CreateBookingResult,
 } from "@/lib/booking";
 import { showToast } from "@/components/Toast";
+import { formatDateOfBirth } from "@/lib/profile-fields";
 
-type Step = "form" | "verify" | "calendly" | "under18";
+type Step = "type" | "time" | "details" | "done";
 
-const CALENDLY_URL = process.env.NEXT_PUBLIC_CALENDLY_URL!;
-
-/* ----------  Validation helpers  ---------- */
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const PHONE_RE = /^\d{10}$/;
-
-/** Strip spaces, dashes, leading +91 / 0 */
-function sanitizePhone(raw: string): string {
-  return raw.replace(/[\s\-().]/g, "").replace(/^(\+91|91|0)/, "");
+interface BookerProfile {
+  displayName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  pronouns: string;
+  termsAcceptedAt: string | null;
 }
 
-/* ----------  Rate-limit / spam helpers  ---------- */
+const CATEGORIES = [
+  "Relationships",
+  "Loneliness",
+  "Anxiety",
+  "Depression",
+  "Trauma",
+  "Self-Esteem",
+  "Women's Issues",
+  "Other / Not sure",
+];
 
-const RATE_LIMIT_KEY = "eob_submit_ts";
-const RATE_LIMIT_COOLDOWN = 60_000; // 1 minute between submissions
-const HONEYPOT_FIELD = "website"; // invisible field bots will fill
-
-function isRateLimited(): boolean {
-  try {
-    const last = Number(localStorage.getItem(RATE_LIMIT_KEY) || 0);
-    return Date.now() - last < RATE_LIMIT_COOLDOWN;
-  } catch {
-    return false;
-  }
+/** "2026-07-23" → "Thu, 23 Jul". The string is already a calendar date. */
+function formatDayLabel(date: string): { weekday: string; day: string } {
+  const d = new Date(`${date}T00:00:00Z`);
+  return {
+    weekday: new Intl.DateTimeFormat("en-GB", {
+      weekday: "short",
+      timeZone: "UTC",
+    }).format(d),
+    day: new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "short",
+      timeZone: "UTC",
+    }).format(d),
+  };
 }
 
-function markSubmission() {
-  try {
-    localStorage.setItem(RATE_LIMIT_KEY, String(Date.now()));
-  } catch {
-    /* private browsing */
-  }
+function formatPrice(price: number): string {
+  return price === 0 ? "Complimentary" : `₹${price.toLocaleString("en-IN")}`;
 }
 
-/* ----------  Component  ---------- */
+/** Dates shown before the "show all" reveal — two tidy rows on desktop. */
+const DAYS_PER_PAGE = 10;
 
 export default function BookPage() {
-  const router = useRouter();
-  const [step, setStep] = useState<Step>("form");
-  const [loading, setLoading] = useState(false);
-  const [bookingId, setBookingId] = useState<string | null>(null);
-  const calendlyContainerRef = useRef<HTMLDivElement>(null);
-  const formStartTime = useRef(Date.now());
+  const [step, setStep] = useState<Step>("type");
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    whatsapp: "",
-    age: "",
-    gender: "",
-    pronouns: "",
-    sessionType: "",
-    category: "",
-    concern: "",
+  const [sessionTypes, setSessionTypes] = useState<SessionTypeOption[]>([]);
+  const [sessionTypeId, setSessionTypeId] = useState("");
+  const [days, setDays] = useState<DayAvailability[]>([]);
+  const [timezone, setTimezone] = useState("Asia/Kolkata");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState<SlotOption | null>(null);
+  const [showAllDays, setShowAllDays] = useState(false);
+
+  const [category, setCategory] = useState("");
+  const [concern, setConcern] = useState("");
+
+  // Session-specific acknowledgements — confirmed on every booking.
+  const [consent, setConsent] = useState({
+    paidSession: false,
+    paymentFirst: false,
+    communicationConsent: false,
+    notes: "",
   });
+  const allConsentGiven =
+    consent.paidSession &&
+    consent.paymentFirst &&
+    consent.communicationConsent;
 
-  // Honeypot field — invisible to real users, bots auto-fill it
-  const [genderOther, setGenderOther] = useState("");
-  const [pronounsOther, setPronounsOther] = useState("");
-  const [honeypot, setHoneypot] = useState("");
+  const [loadingTypes, setLoadingTypes] = useState(true);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<CreateBookingResult | null>(null);
 
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [profile, setProfile] = useState<BookerProfile | null>(null);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [needsTerms, setNeedsTerms] = useState(false);
 
-  // Email verification (OTP) state
-  const [otpCode, setOtpCode] = useState("");
-  const [otpError, setOtpError] = useState("");
-  const [verifying, setVerifying] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
-
-  function updateField(field: string, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    // Clear error on change
-    if (fieldErrors[field]) {
-      setFieldErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-  }
-
-  /* ----------  Resend cooldown countdown  ---------- */
-
+  // Load the bookable session types once.
   useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
+    getAvailability()
+      .then((data) => {
+        setSessionTypes(data.sessionTypes);
+        setTimezone(data.timezone);
+      })
+      .catch(() => showToast("Could not load session types.", "error"))
+      .finally(() => setLoadingTypes(false));
+  }, []);
 
-  /* ----------  Validation  ---------- */
+  // The therapist needs these details before a session; older accounts may not
+  // have them yet, so we check here rather than failing at the final step.
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return;
+        setProfile(data.user);
+        setMissingFields(data.missingFields ?? []);
+        setNeedsTerms(Boolean(data.needsTerms));
+      })
+      .catch(() => {});
+  }, []);
 
-  function validateForm(): boolean {
-    const errors: Record<string, string> = {};
-
-    if (!form.name.trim()) errors.name = "Name is required.";
-    if (!form.email.trim()) {
-      errors.email = "Email is required.";
-    } else if (!EMAIL_RE.test(form.email.trim())) {
-      errors.email = "Please enter a valid email address.";
-    }
-
-    const cleanPhone = sanitizePhone(form.whatsapp);
-    if (!cleanPhone) {
-      errors.whatsapp = "WhatsApp number is required.";
-    } else if (!PHONE_RE.test(cleanPhone)) {
-      errors.whatsapp = "Please enter a valid 10-digit mobile number.";
-    }
-
-    if (!form.age) {
-      errors.age = "Age is required.";
-    } else {
-      const ageNum = Number(form.age);
-      if (ageNum < 1 || ageNum > 120) errors.age = "Enter a valid age.";
-    }
-
-    if (!form.gender) {
-      errors.gender = "Please select your gender.";
-    } else if (form.gender === "Other" && !genderOther.trim()) {
-      errors.gender = "Please specify your gender.";
-    }
-    if (!form.pronouns) {
-      errors.pronouns = "Please select your pronouns.";
-    } else if (form.pronouns === "Other" && !pronounsOther.trim()) {
-      errors.pronouns = "Please specify your pronouns.";
-    }
-    if (!form.concern.trim())
-      errors.concern = "Please let us know what brings you here.";
-    if (!form.sessionType) errors.sessionType = "Please select a session type.";
-    if (!form.category) errors.category = "Please select a category.";
-    if (!agreedTerms)
-      errors.terms = "Please accept the Terms & Conditions to continue.";
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  }
-
-  /* ----------  Submit  ---------- */
-
-  async function handleFormSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    // Honeypot — bots fill this, real users don't see it
-    if (honeypot) {
-      showToast("Your booking has been submitted.", "success");
-      return;
-    }
-
-    // Time-based spam check — form filled in under 3 seconds = bot
-    if (Date.now() - formStartTime.current < 3000) {
-      showToast("Please take a moment to fill out the form.", "info");
-      return;
-    }
-
-    // Rate limit — 1 submission per minute
-    if (isRateLimited()) {
-      showToast(
-        "You've already submitted recently. Please wait a minute before trying again.",
-        "info"
-      );
-      return;
-    }
-
-    // Validate all fields
-    if (!validateForm()) {
-      showToast("Please fix the highlighted fields before continuing.", "error");
-      const firstError = document.querySelector("[data-field-error]");
-      firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-
-    // Under-18 gate — we only work with adults right now.
-    if (Number(form.age) < 18) {
-      setStep("under18");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    setLoading(true);
+  const loadSlots = useCallback(async (typeId: string) => {
+    setLoadingSlots(true);
+    setSelectedDate("");
+    setSelectedSlot(null);
     try {
-      const cleanData = {
-        ...form,
-        name: form.name.trim(),
-        email: form.email.trim().toLowerCase(),
-        whatsapp: sanitizePhone(form.whatsapp),
-        gender:
-          form.gender === "Other" ? `Other: ${genderOther.trim()}` : form.gender,
-        pronouns:
-          form.pronouns === "Other"
-            ? `Other: ${pronounsOther.trim()}`
-            : form.pronouns,
-        concern: form.concern.trim(),
-        termsAccepted: true,
-      };
-
-      const id = await createBooking(cleanData);
-      const { cooldownMs } = await sendEmailOtp(id, "client", cleanData.email);
-
-      markSubmission();
-      setBookingId(id);
-      setOtpCode("");
-      setOtpError("");
-      setCooldown(Math.ceil((cooldownMs ?? 45000) / 1000));
-      setStep("verify");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      console.error("Booking error:", err);
-      showToast(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.",
-        "error"
-      );
+      const data = await getAvailability(typeId);
+      setDays(data.days);
+      setTimezone(data.timezone);
+      if (data.days.length > 0) setSelectedDate(data.days[0].date);
+    } catch {
+      showToast("Could not load available times.", "error");
     } finally {
-      setLoading(false);
+      setLoadingSlots(false);
     }
-  }
+  }, []);
 
-  /* ----------  Email verification  ---------- */
-
-  async function handleVerify(e: React.FormEvent) {
-    e.preventDefault();
-    if (!bookingId || otpCode.length !== 6) return;
-
-    setVerifying(true);
-    setOtpError("");
-    try {
-      await verifyEmailOtp(
-        bookingId,
-        "client",
-        form.email.trim().toLowerCase(),
-        otpCode
-      );
-      setStep("calendly");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      setOtpError(
-        err instanceof Error ? err.message : "Verification failed. Try again."
-      );
-    } finally {
-      setVerifying(false);
-    }
-  }
-
-  async function handleResend() {
-    if (!bookingId || cooldown > 0 || resending) return;
-    setResending(true);
-    setOtpError("");
-    try {
-      const { cooldownMs } = await sendEmailOtp(
-        bookingId,
-        "client",
-        form.email.trim().toLowerCase()
-      );
-      setCooldown(Math.ceil((cooldownMs ?? 45000) / 1000));
-      showToast("A new code is on its way.", "success");
-    } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Could not resend the code.";
-      // If the server returned a cooldown, reflect it
-      setOtpError(msg);
-    } finally {
-      setResending(false);
-    }
-  }
-
-  /* ----------  Calendly  ---------- */
-
-  const handleCalendlyEvent = useCallback(
-    async (e: MessageEvent) => {
-      if (e.data.event === "calendly.event_scheduled" && bookingId) {
-        const payload = e.data.payload;
-        await updateBookingCalendly(bookingId, {
-          eventUri: payload.event?.uri || "",
-          inviteeUri: payload.invitee?.uri || "",
-        });
-        router.push(`/book/consent?id=${bookingId}`);
-      }
-    },
-    [bookingId, router]
+  const selectedType = useMemo(
+    () => sessionTypes.find((s) => s.id === sessionTypeId) ?? null,
+    [sessionTypes, sessionTypeId]
   );
 
-  useEffect(() => {
-    window.addEventListener("message", handleCalendlyEvent);
-    return () => window.removeEventListener("message", handleCalendlyEvent);
-  }, [handleCalendlyEvent]);
-
-  useEffect(() => {
-    if (step !== "calendly" || !calendlyContainerRef.current) return;
-
-    const container = calendlyContainerRef.current;
-    container.innerHTML = "";
-
-    const prefill = new URLSearchParams({
-      name: form.name,
-      email: form.email,
-    });
-
-    const widget = document.createElement("div");
-    widget.className = "calendly-inline-widget";
-    widget.dataset.url = `${CALENDLY_URL}?${prefill.toString()}&hide_gdpr_banner=1`;
-    widget.style.minWidth = "320px";
-    widget.style.height = "700px";
-    container.appendChild(widget);
-
-    if (!document.querySelector('script[src*="calendly.com"]')) {
-      const script = document.createElement("script");
-      script.src = "https://assets.calendly.com/assets/external/widget.js";
-      script.async = true;
-      document.head.appendChild(script);
-    } else {
-      // @ts-expect-error Calendly global
-      window.Calendly?.initInlineWidget?.({
-        url: `${CALENDLY_URL}?${prefill.toString()}&hide_gdpr_banner=1`,
-        parentElement: container,
-      });
+  // Collapsed by default; the selected day always stays on screen.
+  const visibleDays = useMemo(() => {
+    if (showAllDays) return days;
+    const head = days.slice(0, DAYS_PER_PAGE);
+    if (selectedDate && !head.some((d) => d.date === selectedDate)) {
+      const picked = days.find((d) => d.date === selectedDate);
+      if (picked) return [...head, picked];
     }
-  }, [step, form.name, form.email]);
+    return head;
+  }, [days, showAllDays, selectedDate]);
 
-  /* ----------  Inline error helper  ---------- */
+  const slotsForDay = useMemo(
+    () => days.find((d) => d.date === selectedDate)?.slots ?? [],
+    [days, selectedDate]
+  );
 
-  function FieldError({ field }: { field: string }) {
-    const msg = fieldErrors[field];
-    if (!msg) return null;
-    return (
-      <p data-field-error className="text-xs text-red-500 mt-1.5">
-        {msg}
-      </p>
-    );
+  function chooseType(id: string) {
+    setSessionTypeId(id);
+    setStep("time");
+    loadSlots(id);
   }
 
-  const inputClass = (field: string) =>
-    `w-full px-4 py-3 rounded-lg border bg-cream-light focus:outline-none focus:ring-2 transition-shadow duration-300 text-sm ${
-      fieldErrors[field]
-        ? "border-red-400 focus:ring-red-300/40"
-        : "border-border focus:ring-sage-400/40"
-    }`;
+  async function handleConfirm() {
+    if (!selectedSlot || !sessionTypeId) return;
+    if (!concern.trim()) {
+      showToast("Please tell us a little about what brings you here.", "error");
+      return;
+    }
+    if (!category) {
+      showToast("Please choose what you'd like help with.", "error");
+      return;
+    }
+    if (!allConsentGiven) {
+      showToast("Please confirm all three acknowledgements.", "error");
+      return;
+    }
 
-  /* ----------  Render: Under-18 notice  ---------- */
+    setSubmitting(true);
+    try {
+      const booking = await createBooking({
+        sessionTypeId,
+        startMs: selectedSlot.startMs,
+        category,
+        concern: concern.trim(),
+        consent: {
+          paidSession: consent.paidSession,
+          paymentFirst: consent.paymentFirst,
+          communicationConsent: consent.communicationConsent,
+          notes: consent.notes.trim(),
+        },
+      });
+      setResult(booking);
+      setStep("done");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      const err = error as Error & { code?: string };
+      showToast(err.message, "error");
+      // If someone else took the slot, refresh availability and go back.
+      if (err.code === "SLOT_TAKEN") {
+        setStep("time");
+        setSelectedSlot(null);
+        loadSlots(sessionTypeId);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
-  if (step === "under18") {
+  /* ───────────────────────────  done  ─────────────────────────── */
+
+  if (step === "done" && result) {
     return (
       <section className="max-w-2xl mx-auto px-6 pt-16 pb-24">
-        <button
-          onClick={() => setStep("form")}
-          className="inline-flex items-center gap-2 text-sm text-muted hover:text-sage-600 transition-colors duration-300 mb-8"
-        >
+        <div className="w-14 h-14 rounded-full bg-secondary-bg flex items-center justify-center mb-6">
           <svg
-            className="w-4 h-4"
+            className="w-7 h-7 text-sage-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
-          Back to the form
-        </button>
+        </div>
 
-        <h1 className="display text-4xl md:text-5xl mb-6">
-          Thank you for reaching out.
+        <h1 className="display text-4xl md:text-5xl mb-4">
+          Your slot is reserved.
         </h1>
+        <p className="text-muted leading-relaxed mb-8">
+          {formatDayLabel(result.date).weekday},{" "}
+          {formatDayLabel(result.date).day} at {result.time} (IST). We&apos;ve
+          sent the details to your email.
+        </p>
 
-        <div className="space-y-5 text-muted leading-relaxed">
-          <p>
-            Right now I work with adults aged eighteen and above, so I am not
-            able to take this booking just yet. Support for younger people is
-            something we hope to bring to Echoes of Being before long, so please
-            do check back with us.
-          </p>
-          <p>
-            In the meantime, please do not let this stop you from finding
-            support, because it is out there and you deserve it. It can really
-            help to talk to a trusted adult. There are also services in India
-            made especially for young people, with people trained to listen.
-          </p>
-
-          <div className="bg-accent-bg/50 rounded-2xl p-6 space-y-4 my-2">
+        <div className="rounded-[1.5rem] border border-border p-6 space-y-4 mb-8">
+          {result.meetLink ? (
             <div>
-              <p className="text-forest font-medium">
-                Childline India:{" "}
-                <a href="tel:1098" className="text-sage-700 underline">
-                  1098
-                </a>
+              <p className="text-xs font-semibold tracking-wider uppercase text-muted mb-1">
+                Video link
               </p>
-              <p className="text-sm">
-                Available any time, free of cost.
-              </p>
+              <a
+                href={result.meetLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sage-600 underline break-all text-sm"
+              >
+                {result.meetLink}
+              </a>
             </div>
-            <div>
-              <p className="text-forest font-medium">
-                Tele MANAS (national mental health helpline):{" "}
-                <a href="tel:14416" className="text-sage-700 underline">
-                  14416
-                </a>
-              </p>
-              <p className="text-sm">
-                Free and available day and night.
-              </p>
-            </div>
-          </div>
-
-          <p>
-            I hope you find the right space soon. And you are always welcome
-            here, whether that is once you turn eighteen, or sooner if we are
-            able to open this space up.
+          ) : (
+            <p className="text-sm text-muted">
+              Your video link will be shared with you before the session.
+            </p>
+          )}
+          <p className="text-sm text-muted leading-relaxed">
+            Your slot is held, not yet confirmed. We&apos;ll reach out on
+            WhatsApp with payment details, and your session is confirmed once
+            payment is verified.
           </p>
         </div>
 
-        <div className="mt-10">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 bg-sage-600 text-cream px-6 py-3 rounded-full text-sm font-medium hover:bg-sage-700 transition-colors duration-300"
-          >
+        <div className="flex flex-wrap gap-4">
+          <Link href="/profile" className="btn-pill">
+            View my sessions
+          </Link>
+          <Link href="/" className="btn-pill-outline">
             Back to home
           </Link>
         </div>
@@ -440,439 +273,375 @@ export default function BookPage() {
     );
   }
 
-  /* ----------  Render: Verify step  ---------- */
+  /* ──────────────────  profile must be complete first  ─────────── */
 
-  if (step === "verify") {
+  if (missingFields.length > 0 || needsTerms) {
     return (
-      <>
-        <section className="max-w-md mx-auto px-6 pt-16 pb-4">
-          <button
-            onClick={() => setStep("form")}
-            className="inline-flex items-center gap-2 text-sm text-muted hover:text-sage-600 transition-colors duration-300 mb-6"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Wrong email? Go back
-          </button>
-          <h1 className="display text-4xl md:text-5xl mb-3">
-            Confirm your email.
-          </h1>
-          <p className="text-muted">
-            We sent a 6-digit code to{" "}
-            <span className="text-forest font-medium">{form.email}</span>. Enter
-            it below to continue.
-          </p>
-        </section>
-
-        <section className="max-w-md mx-auto px-6 pb-20">
-          <form
-            onSubmit={handleVerify}
-            className="border border-border rounded-2xl p-8 space-y-5"
-          >
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              autoFocus
-              value={otpCode}
-              onChange={(e) => {
-                setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6));
-                setOtpError("");
-              }}
-              placeholder="000000"
-              className={`w-full text-center tracking-[0.5em] text-2xl font-medium px-4 py-3.5 rounded-lg border bg-cream-light focus:outline-none focus:ring-2 transition-shadow duration-300 ${
-                otpError
-                  ? "border-red-400 focus:ring-red-300/40"
-                  : "border-border focus:ring-sage-400/40"
-              }`}
-            />
-            {otpError && <p className="text-xs text-red-500">{otpError}</p>}
-
-            <button
-              type="submit"
-              disabled={verifying || otpCode.length !== 6}
-              className="w-full bg-forest text-cream py-3.5 rounded-lg text-sm font-medium hover:bg-sage-700 hover:shadow-lg hover:shadow-sage-600/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {verifying ? "Verifying..." : "Verify & continue"}
-            </button>
-
-            <div className="text-center text-sm text-muted">
-              Didn&apos;t get it?{" "}
-              {cooldown > 0 ? (
-                <span>Resend in {cooldown}s</span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={resending}
-                  className="text-sage-600 hover:text-sage-700 font-medium underline disabled:opacity-50"
-                >
-                  {resending ? "Sending..." : "Resend code"}
-                </button>
-              )}
-            </div>
-          </form>
-        </section>
-      </>
+      <section className="max-w-2xl mx-auto px-6 pt-16 pb-24">
+        <h1 className="display text-4xl md:text-5xl mb-4">
+          {needsTerms && missingFields.length === 0
+            ? "One thing to confirm first."
+            : "Just a couple of details first."}
+        </h1>
+        <p className="text-muted leading-relaxed mb-8">
+          {needsTerms && missingFields.length === 0
+            ? "Your account was created before we introduced our current Terms & Conditions and Privacy Policy. Please review and accept them, and we won't ask again."
+            : "Before your first session we need a little more information. It takes a moment, and you won't be asked again."}
+        </p>
+        <Link href="/profile" className="btn-pill">
+          {needsTerms && missingFields.length === 0
+            ? "Review and accept"
+            : "Complete my details"}
+        </Link>
+      </section>
     );
   }
 
-  /* ----------  Render: Calendly step  ---------- */
-
-  if (step === "calendly") {
-    return (
-      <>
-        <section className="max-w-3xl mx-auto px-6 pt-16 pb-4">
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
-            Step 2 of 3
-          </span>
-          <h1 className="display text-4xl md:text-5xl mb-3">
-            Choose a time.
-          </h1>
-          <p className="text-muted max-w-xl mb-2">
-            Select a slot that works for you. This will temporarily reserve your
-            spot on the calendar.
-          </p>
-        </section>
-
-        <section className="max-w-3xl mx-auto px-6 pb-20">
-          <div
-            ref={calendlyContainerRef}
-            className="rounded-2xl overflow-hidden border border-border"
-          />
-        </section>
-      </>
-    );
-  }
-
-  /* ----------  Render: Form step  ---------- */
+  /* ───────────────────────────  wizard  ───────────────────────── */
 
   return (
     <>
-      <section className="max-w-3xl mx-auto px-6 pt-16 pb-8">
+      <section className="max-w-3xl mx-auto px-6 pt-16 pb-6">
         <span className="text-xs font-semibold tracking-[0.2em] uppercase text-sage-600 block mb-4">
-          Step 1 of 3
+          {step === "type"
+            ? "Step 1 of 3"
+            : step === "time"
+            ? "Step 2 of 3"
+            : "Step 3 of 3"}
         </span>
         <h1 className="display text-4xl md:text-5xl mb-4">
-          Tell us a little about yourself.
+          {step === "type"
+            ? "What would you like to book?"
+            : step === "time"
+            ? "Choose a time."
+            : "A little about you."}
         </h1>
         <p className="text-muted max-w-xl">
-          This helps us understand what brings you here before we meet.
-          Everything you share is kept strictly confidential.
+          {step === "type"
+            ? "Start wherever feels right. The first conversation is always free."
+            : step === "time"
+            ? `All times are shown in Indian Standard Time. Sessions are booked at least 24 hours ahead.`
+            : "This helps us understand what brings you here before we meet. Everything you share is kept strictly confidential."}
         </p>
       </section>
 
-      <section className="max-w-3xl mx-auto px-6 pb-20">
-        <form
-          onSubmit={handleFormSubmit}
-          className="border border-border rounded-2xl p-8 md:p-10 space-y-6"
-          noValidate
-        >
-          {/* Honeypot — hidden from real users, bots will fill it */}
-          <div
-            className="absolute -left-[9999px] opacity-0 h-0 overflow-hidden"
-            aria-hidden="true"
-          >
-            <label>
-              Website
-              <input
-                type="text"
-                name={HONEYPOT_FIELD}
-                tabIndex={-1}
-                autoComplete="off"
-                value={honeypot}
-                onChange={(e) => setHoneypot(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-                Full name <span className="text-sage-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={form.name}
-                onChange={(e) => updateField("name", e.target.value)}
-                placeholder="Your name"
-                className={inputClass("name")}
-              />
-              <FieldError field="name" />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-                Email <span className="text-sage-500">*</span>
-              </label>
-              <input
-                type="email"
-                required
-                value={form.email}
-                onChange={(e) => updateField("email", e.target.value)}
-                placeholder="you@example.com"
-                className={inputClass("email")}
-              />
-              <FieldError field="email" />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-              WhatsApp number <span className="text-sage-500">*</span>
-            </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-3.5 rounded-l-lg border border-r-0 border-border bg-accent-bg/60 text-sm text-muted">
-                +91
-              </span>
-              <input
-                type="tel"
-                required
-                maxLength={14}
-                value={form.whatsapp}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/[^\d\s-]/g, "");
-                  updateField("whatsapp", val);
-                }}
-                placeholder="98765 43210"
-                className={`flex-1 px-4 py-3 rounded-r-lg border bg-cream-light focus:outline-none focus:ring-2 transition-shadow duration-300 text-sm ${
-                  fieldErrors.whatsapp
-                    ? "border-red-400 focus:ring-red-300/40"
-                    : "border-border focus:ring-sage-400/40"
-                }`}
-              />
-            </div>
-            <FieldError field="whatsapp" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-                Age <span className="text-sage-500">*</span>
-              </label>
-              <input
-                type="number"
-                required
-                min="1"
-                max="120"
-                value={form.age}
-                onChange={(e) => updateField("age", e.target.value)}
-                placeholder="Your age"
-                className={inputClass("age")}
-              />
-              <FieldError field="age" />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-                Gender <span className="text-sage-500">*</span>
-              </label>
-              <select
-                required
-                value={form.gender}
-                onChange={(e) => {
-                  updateField("gender", e.target.value);
-                  if (e.target.value !== "Other") setGenderOther("");
-                }}
-                className={inputClass("gender")}
-              >
-                <option value="" disabled>
-                  Select
-                </option>
-                <option>Female</option>
-                <option>Male</option>
-                <option>Transgender</option>
-                <option>Non-binary</option>
-                <option>Genderqueer</option>
-                <option>Genderfluid</option>
-                <option>Agender</option>
-                <option>Other</option>
-                <option>Rather not say</option>
-              </select>
-              {form.gender === "Other" && (
-                <input
-                  type="text"
-                  value={genderOther}
-                  onChange={(e) => setGenderOther(e.target.value)}
-                  placeholder="Please specify"
-                  className="mt-2 w-full px-4 py-2.5 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm"
-                />
-              )}
-              <FieldError field="gender" />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-                Pronouns <span className="text-sage-500">*</span>
-              </label>
-              <select
-                required
-                value={form.pronouns}
-                onChange={(e) => {
-                  updateField("pronouns", e.target.value);
-                  if (e.target.value !== "Other") setPronounsOther("");
-                }}
-                className={inputClass("pronouns")}
-              >
-                <option value="" disabled>
-                  Select
-                </option>
-                <option>She/Her</option>
-                <option>He/Him</option>
-                <option>They/Them</option>
-                <option>She/They</option>
-                <option>He/They</option>
-                <option>Ze/Zir</option>
-                <option>Any pronouns</option>
-                <option>Other</option>
-                <option>Rather not say</option>
-              </select>
-              {form.pronouns === "Other" && (
-                <input
-                  type="text"
-                  value={pronounsOther}
-                  onChange={(e) => setPronounsOther(e.target.value)}
-                  placeholder="Please specify"
-                  className="mt-2 w-full px-4 py-2.5 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm"
-                />
-              )}
-              <FieldError field="pronouns" />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-              What brings you here? <span className="text-sage-500">*</span>
-            </label>
-            <textarea
-              rows={4}
-              required
-              maxLength={2000}
-              value={form.concern}
-              onChange={(e) => updateField("concern", e.target.value)}
-              placeholder="A few words about what you're going through, or any questions you have."
-              className={`w-full px-4 py-3 rounded-lg border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 transition-shadow duration-300 text-sm resize-y ${
-                fieldErrors.concern ? "border-red-300" : "border-border"
-              }`}
-            />
-            <div className="flex items-center justify-between mt-1">
-              <FieldError field="concern" />
-              <p className="text-[11px] text-muted">{form.concern.length}/2000</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-                Type of session <span className="text-sage-500">*</span>
-              </label>
-              <select
-                required
-                value={form.sessionType}
-                onChange={(e) => updateField("sessionType", e.target.value)}
-                className={inputClass("sessionType")}
-              >
-                <option value="" disabled>
-                  Select session type
-                </option>
-                <option value="Introductory consultation">
-                  Introductory consultation (Free)
-                </option>
-                <option value="Individual therapy">
-                  Individual therapy (₹2,000)
-                </option>
-              </select>
-              <FieldError field="sessionType" />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
-                What do you need help with?{" "}
-                <span className="text-sage-500">*</span>
-              </label>
-              <select
-                required
-                value={form.category}
-                onChange={(e) => updateField("category", e.target.value)}
-                className={inputClass("category")}
-              >
-                <option value="" disabled>
-                  Select a category
-                </option>
-                <option>Relationships</option>
-                <option>Loneliness</option>
-                <option>Anxiety</option>
-                <option>Depression</option>
-                <option>Trauma</option>
-                <option>Self-Esteem</option>
-                <option>Women&apos;s Issues</option>
-                <option>Other / Not sure</option>
-              </select>
-              <FieldError field="category" />
-            </div>
-          </div>
-
-          {/* Terms acceptance */}
-          <div>
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={agreedTerms}
-                onChange={(e) => {
-                  setAgreedTerms(e.target.checked);
-                  if (e.target.checked && fieldErrors.terms) {
-                    setFieldErrors((prev) => {
-                      const next = { ...prev };
-                      delete next.terms;
-                      return next;
-                    });
-                  }
-                }}
-                className="mt-0.5 w-4 h-4 rounded border-border text-sage-600 focus:ring-sage-400/40 flex-shrink-0"
-              />
-              <span className="text-sm text-muted leading-relaxed group-hover:text-forest transition-colors duration-300">
-                I have read and agree to the{" "}
-                <a
-                  href="/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sage-600 underline hover:text-sage-700"
+      <section className="max-w-3xl mx-auto px-6 pb-24">
+        {/* ── Step 1: session type ── */}
+        {step === "type" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {loadingTypes ? (
+              <p className="text-sm text-muted">Loading…</p>
+            ) : (
+              sessionTypes.map((type) => (
+                <button
+                  key={type.id}
+                  onClick={() => chooseType(type.id)}
+                  className="text-left rounded-[1.5rem] border border-border p-7 hover:border-sage-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  Terms &amp; Conditions
-                </a>{" "}
-                and the practice&apos;s privacy practices.{" "}
-                <span className="text-sage-500">*</span>
-              </span>
-            </label>
-            <FieldError field="terms" />
+                  <h2 className="font-serif text-xl font-medium mb-1">
+                    {type.label}
+                  </h2>
+                  <p className="text-sm text-muted mb-4">
+                    {type.durationMin} minutes
+                  </p>
+                  <p className="display text-2xl text-sage-600">
+                    {formatPrice(type.price)}
+                  </p>
+                </button>
+              ))
+            )}
           </div>
+        )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-forest text-cream py-3.5 rounded-lg text-sm font-medium hover:bg-sage-700 hover:shadow-lg hover:shadow-sage-600/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Sending verification code..." : "Continue"}
-          </button>
+        {/* ── Step 2: date + time ── */}
+        {step === "time" && (
+          <div>
+            <button
+              onClick={() => setStep("type")}
+              className="text-sm text-muted hover:text-sage-600 mb-6 transition-colors"
+            >
+              ← Change session type
+            </button>
 
-          <p className="text-xs text-muted text-center leading-relaxed">
-            We&apos;ll send a quick confirmation code to your email so we know
-            it&apos;s really you. Your details stay private and are only ever
-            used to arrange your session.
-          </p>
-        </form>
+            {loadingSlots ? (
+              <p className="text-sm text-muted">Loading available times…</p>
+            ) : days.length === 0 ? (
+              <div className="rounded-[1.5rem] border border-border p-8 text-center">
+                <p className="text-muted">
+                  There are no open times right now. Please check back soon, or
+                  email us and we&apos;ll find a slot for you.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Dates — a wrapping grid, so there is nothing to scroll sideways. */}
+                <p className="text-xs uppercase tracking-[0.18em] text-muted mb-3">
+                  Choose a day
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5 mb-4">
+                  {visibleDays.map((day) => {
+                    const label = formatDayLabel(day.date);
+                    const active = day.date === selectedDate;
+                    return (
+                      <button
+                        key={day.date}
+                        onClick={() => {
+                          setSelectedDate(day.date);
+                          setSelectedSlot(null);
+                        }}
+                        className={`py-2.5 rounded-2xl border text-center transition-all duration-200 ${
+                          active
+                            ? "border-sage-500 bg-secondary-bg/60"
+                            : "border-border hover:border-sage-400/60"
+                        }`}
+                      >
+                        <span className="block text-[11px] uppercase tracking-wide text-muted">
+                          {label.weekday}
+                        </span>
+                        <span className="block text-sm font-medium mt-0.5">
+                          {label.day}
+                        </span>
+                        <span className="block text-[10px] text-muted mt-0.5">
+                          {day.slots.length} open
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {days.length > DAYS_PER_PAGE && (
+                  <button
+                    onClick={() => setShowAllDays((v) => !v)}
+                    className="text-sm text-sage-600 hover:text-forest transition-colors"
+                  >
+                    {showAllDays
+                      ? "Show fewer dates"
+                      : `Show all ${days.length} available dates`}
+                  </button>
+                )}
+
+                {/* Times */}
+                <p className="text-xs uppercase tracking-[0.18em] text-muted mt-8 mb-3">
+                  Choose a time{" "}
+                  <span className="normal-case tracking-normal">
+                    ({timezone === "Asia/Kolkata" ? "IST" : timezone})
+                  </span>
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-10">
+                  {slotsForDay.map((slot) => {
+                    const active = selectedSlot?.startMs === slot.startMs;
+                    return (
+                      <button
+                        key={slot.startMs}
+                        onClick={() => setSelectedSlot(slot)}
+                        className={`py-3 rounded-xl border text-sm transition-all duration-200 ${
+                          active
+                            ? "border-sage-500 bg-sage-600 text-cream"
+                            : "border-border hover:border-sage-400"
+                        }`}
+                      >
+                        {slot.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  disabled={!selectedSlot}
+                  onClick={() => setStep("details")}
+                  className="btn-pill disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Continue
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── Step 3: details ── */}
+        {step === "details" && selectedSlot && (
+          <div>
+            <button
+              onClick={() => setStep("time")}
+              className="text-sm text-muted hover:text-sage-600 mb-6 transition-colors"
+            >
+              ← Change time
+            </button>
+
+            <div className="rounded-2xl bg-accent-bg/50 px-5 py-4 mb-6 text-sm">
+              <span className="font-medium">{selectedType?.label}</span>
+              <span className="text-muted">
+                {" "}
+                · {formatDayLabel(selectedDate).weekday}{" "}
+                {formatDayLabel(selectedDate).day} at {selectedSlot.label} IST
+              </span>
+            </div>
+
+            {/* What we'll send with the booking */}
+            {profile && (
+              <div className="rounded-[1.5rem] border border-border p-5 mb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold tracking-wider uppercase text-muted">
+                    Your details
+                  </h2>
+                  <Link
+                    href="/profile"
+                    className="text-xs text-sage-600 underline"
+                  >
+                    Edit
+                  </Link>
+                </div>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted">Name</dt>
+                    <dd>{profile.displayName}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted">Email</dt>
+                    <dd className="truncate">{profile.email}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted">WhatsApp</dt>
+                    <dd>+91 {profile.phone}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted">Date of birth</dt>
+                    <dd>{formatDateOfBirth(profile.dateOfBirth)}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted">Gender</dt>
+                    <dd>{profile.gender}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted">Pronouns</dt>
+                    <dd>{profile.pronouns}</dd>
+                  </div>
+                </dl>
+              </div>
+            )}
+
+            <div className="space-y-6">
+              <div>
+                <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
+                  What would you like help with?{" "}
+                  <span className="text-sage-500">*</span>
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 text-sm"
+                >
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
+                  What brings you here? <span className="text-sage-500">*</span>
+                </label>
+                <textarea
+                  rows={5}
+                  maxLength={2000}
+                  value={concern}
+                  onChange={(e) => setConcern(e.target.value)}
+                  placeholder="A few words about what you're going through, or any questions you have."
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 text-sm resize-y"
+                />
+                <p className="text-[11px] text-muted text-right mt-1">
+                  {concern.length}/2000
+                </p>
+              </div>
+
+              {/* Session acknowledgements — confirmed for each booking */}
+              <div className="rounded-[1.5rem] border border-border p-5 space-y-4">
+                <h2 className="text-xs font-semibold tracking-wider uppercase text-muted">
+                  Before we confirm
+                </h2>
+
+                {[
+                  {
+                    key: "paidSession" as const,
+                    text: "I understand that therapy sessions are paid and that the fee applies to the slot I have selected.",
+                  },
+                  {
+                    key: "paymentFirst" as const,
+                    text: "I understand that my session will be confirmed only after payment verification, and that session access details are shared after payment is received.",
+                  },
+                  {
+                    key: "communicationConsent" as const,
+                    text: "I consent to receiving communication regarding my booking via email and WhatsApp.",
+                  },
+                ].map((item) => (
+                  <label
+                    key={item.key}
+                    className="flex items-start gap-3 cursor-pointer group"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={consent[item.key]}
+                      onChange={(e) =>
+                        setConsent({ ...consent, [item.key]: e.target.checked })
+                      }
+                      className="mt-0.5 w-4 h-4 rounded border-border text-sage-600 focus:ring-sage-400/40 flex-shrink-0"
+                    />
+                    <span className="text-sm text-muted leading-relaxed group-hover:text-forest transition-colors duration-300">
+                      {item.text}{" "}
+                      <span className="text-sage-500">*</span>
+                    </span>
+                  </label>
+                ))}
+
+                <div className="pt-1">
+                  <label className="text-xs font-semibold tracking-wider uppercase block mb-2">
+                    Anything else? (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    maxLength={1000}
+                    value={consent.notes}
+                    onChange={(e) =>
+                      setConsent({ ...consent, notes: e.target.value })
+                    }
+                    placeholder="Any additional notes or questions."
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-cream-light focus:outline-none focus:ring-2 focus:ring-sage-400/40 text-sm resize-y"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleConfirm}
+                disabled={submitting || !allConsentGiven}
+                className="btn-pill w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? "Reserving your slot…" : "Reserve my slot"}
+              </button>
+
+              <p className="text-xs text-muted text-center leading-relaxed">
+                You accepted our{" "}
+                <Link href="/terms" target="_blank" className="underline">
+                  Terms &amp; Conditions
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" target="_blank" className="underline">
+                  Privacy Policy
+                </Link>
+                {profile?.termsAcceptedAt
+                  ? ` on ${new Intl.DateTimeFormat("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }).format(new Date(profile.termsAcceptedAt))}`
+                  : " when you created your account"}
+                , so we won&apos;t ask again. Your details stay private and are
+                only ever used to arrange your session.
+              </p>
+            </div>
+          </div>
+        )}
       </section>
     </>
   );

@@ -84,17 +84,17 @@ export default function Navbar() {
             </Link>
 
             {/* Profile icon or Login link */}
-            {COMMUNITY_ENABLED && !loading && (
+            {!loading && (
               <>
                 {user ? (
                   <Link
-                    href="/community/profile"
+                    href="/profile"
                     className={`p-2 rounded-full transition-colors duration-200 ${
-                      pathname === "/community/profile"
+                      pathname === "/profile"
                         ? "text-sage-600 bg-accent-bg"
                         : "text-muted hover:text-sage-600 hover:bg-accent-bg"
                     }`}
-                    aria-label="Profile"
+                    aria-label="Your account"
                   >
                     <svg
                       className="w-5 h-5"
@@ -188,11 +188,11 @@ export default function Navbar() {
             </Link>
 
             {/* Auth in mobile */}
-            {COMMUNITY_ENABLED && !loading && (
+            {!loading && (
               <>
                 {user ? (
                   <Link
-                    href="/community/profile"
+                    href="/profile"
                     onClick={() => toggleMobileNav(false)}
                     className="flex items-center gap-3 py-2 border-t border-border mt-1 pt-4 text-sm text-muted hover:text-sage-600 transition-colors"
                   >

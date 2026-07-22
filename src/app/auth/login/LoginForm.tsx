@@ -35,8 +35,8 @@ export default function LoginForm() {
       }
 
       await refresh();
-      const redirect = searchParams.get("redirect") || "/community";
-      router.push(redirect);
+      const target = searchParams.get("redirect");
+      router.push(target && target.startsWith("/") ? target : "/profile");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

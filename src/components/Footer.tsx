@@ -93,12 +93,18 @@ export default function Footer() {
               </svg>
               @echoesofbeing.therapy
             </a>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
               <Link
                 href="/terms"
                 className="text-xs text-muted hover:text-forest transition-colors duration-300"
               >
                 Terms & Conditions
+              </Link>
+              <Link
+                href="/privacy"
+                className="text-xs text-muted hover:text-forest transition-colors duration-300"
+              >
+                Privacy Policy
               </Link>
             </div>
           </div>

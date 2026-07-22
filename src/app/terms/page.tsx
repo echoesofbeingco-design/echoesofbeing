@@ -36,12 +36,23 @@ const sections = [
     ],
   },
   {
-    title: "4. Booking & Scheduling",
+    title: "4. Your account",
     content: [
-      "Sessions are booked through our website using the online booking system. A booking is considered a request until confirmed by the practice after payment verification.",
+      "To book a session you need an account with Echoes of Being, created with your email address and a password. Your email address is verified when you register, and we do not require or collect any identity documents.",
+      "Each person may hold only one account, and an account is personal to you. You are responsible for keeping your password confidential and for any activity that takes place under your account. Please tell us promptly if you believe your account has been accessed by someone else.",
+      "Passwords are stored only as a securely hashed value. We cannot see, retrieve or tell you your password. If you forget it, you can request a reset link by email.",
+      "Holding an account means we ask you to read and accept these terms once, at registration, rather than at every booking. If these terms change materially, we will ask you to review and accept them again.",
+      "You may delete your account at any time from your profile page. Please see our Privacy Policy for what is deleted immediately and what we are professionally obliged to retain.",
+    ],
+  },
+  {
+    title: "5. Booking & Scheduling",
+    content: [
+      "Sessions are booked through our website using our own online booking system. A booking is considered a request until confirmed by the practice after payment verification.",
       "By completing the intake form, you consent to the collection of the personal information requested, which is used solely for the purpose of providing you with appropriate therapeutic care.",
-      "To confirm that a booking is genuine, we ask you to verify your email address by entering a short code we send to it. Bookings cannot proceed without this verification. We do not require or collect any identity documents.",
+      "Available times are shown in Indian Standard Time. Sessions must be booked at least 24 hours in advance, and available days, hours and session lengths are set by the practice and may change from time to time.",
       "Session slots are reserved temporarily upon scheduling. Your slot is confirmed only after payment has been received and verified. Unconfirmed bookings may be released.",
+      "When your session is confirmed, an appointment is created in the practice calendar and you are invited as a guest so that it appears in your own calendar, together with a private video link for the session.",
     ],
   },
   {
@@ -74,10 +85,11 @@ const sections = [
     title: "8. Data Collection & Privacy",
     content: [
       "We collect personal information through our booking form, including your name, email address, WhatsApp number, age, gender, pronouns, and details about what brings you to therapy. This information is used exclusively for providing and managing your therapeutic care.",
-      "To confirm that a booking is genuine, we send a short verification code to your email address, which you enter to confirm it is reachable and belongs to you. We do not collect or store any identity documents (such as Aadhaar or other ID).",
+      "To confirm that a booking is genuine, we verify your email address when you register an account. We do not collect or store any identity documents (such as Aadhaar or other ID).",
       "We do not sell, trade, or share your personal information with third parties, except as required to provide our services (e.g., email and communication platforms) or as required by law.",
-      "We use the following third-party services to operate: Firebase (data storage, by Google), Resend (transactional email, including verification codes), and Calendly (scheduling). Each of these services has its own privacy policy, and your data is subject to their respective terms when processed through their platforms.",
-      "You have the right to request access to, correction of, or deletion of your personal data at any time by contacting us at the email address provided below.",
+      "We use the following third-party services to operate: Firebase (data storage, by Google), Resend (transactional email), Google Calendar and Google Meet (scheduling your appointment and hosting the session video call), Vercel (website hosting) and Sanity (which stores our published articles only, and holds no client data). Each of these services has its own privacy policy, and your data is subject to their respective terms when processed through their platforms.",
+      "We do not use analytics, advertising or tracking cookies on this website, and we do not use your personal information to train artificial intelligence models.",
+      "You have the right to request access to, correction of, or deletion of your personal data at any time by contacting us at the email address provided below. Our Privacy Policy sets out these rights, our retention periods and our security practices in full.",
     ],
   },
   {
@@ -217,7 +229,14 @@ export default function TermsPage() {
           <p className="text-muted max-w-xl">
             Please review these terms carefully. They outline how our practice
             operates, what you can expect from us, and how we handle your
-            information.
+            information. Our{" "}
+            <Link
+              href="/privacy"
+              className="text-sage-600 underline hover:text-sage-700"
+            >
+              Privacy Policy
+            </Link>{" "}
+            explains your data rights in full.
           </p>
           <p className="text-xs text-muted mt-6">
             Last updated: June 2026

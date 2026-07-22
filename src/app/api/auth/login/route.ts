@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getUserByEmail, verifyPassword } from "@/lib/auth";
 import { createSession } from "@/lib/session";
+import { syncClientFromUser } from "@/lib/client-sync";
 import { rateLimits } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
@@ -54,6 +55,13 @@ export async function POST(request: NextRequest) {
     }
 
     await createSession(user._id, user.displayName);
+
+    // Push the account's current details onto their clinical client record, so
+    // accounts that predate these fields self-heal on their next sign-in.
+    // Deliberately not awaited-into-failure: sync issues must never block login.
+    await syncClientFromUser(user).catch((e) =>
+      console.error("login: client sync failed", e)
+    );
 
     return NextResponse.json({
       success: true,

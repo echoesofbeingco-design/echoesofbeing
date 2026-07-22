@@ -1,113 +1,119 @@
-export interface BookingData {
-  name: string;
-  email: string;
-  whatsapp: string;
-  age: string;
-  gender: string;
-  pronouns: string;
+/**
+ * Client-side wrapper around the booking + availability APIs.
+ * All calls are authenticated by the session cookie; the server enforces
+ * ownership, slot validity and double-booking protection.
+ */
+
+export interface SessionTypeOption {
+  id: string;
+  label: string;
+  durationMin: number;
+  price: number;
+  enabled: boolean;
+}
+
+export interface SlotOption {
+  startISO: string;
+  endISO: string;
+  startMs: number;
+  endMs: number;
+  label: string;
+}
+
+export interface DayAvailability {
+  date: string;
+  slots: SlotOption[];
+}
+
+export interface AvailabilityResponse {
+  timezone: string;
+  sessionTypes: SessionTypeOption[];
+  minNoticeHours?: number;
+  days: DayAvailability[];
+}
+
+export interface BookingSummary {
+  id: string;
+  status: string;
   sessionType: string;
   category: string;
   concern: string;
-  termsAccepted?: boolean;
+  startMs?: number;
+  startISO: string | null;
+  endISO: string | null;
+  timezone: string;
+  meetLink: string | null;
+  createdAt: string;
 }
 
-export interface CalendlyData {
-  eventUri: string;
-  inviteeUri: string;
-}
-
-export interface ConsentData {
-  paidSession: boolean;
-  paymentFirst: boolean;
-  communicationConsent: boolean;
-  notes: string;
-}
-
-export type BookingStatus =
-  | "intake_submitted"
-  | "slot_reserved"
-  | "pending_payment"
-  | "payment_verified"
-  | "confirmed";
-
-async function bookingApi(body: Record<string, unknown>) {
+async function bookingApi<T>(body: Record<string, unknown>): Promise<T> {
   const res = await fetch("/api/bookings", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-
   const data = await res.json();
-
   if (!res.ok) {
-    throw new Error(data.error || "Something went wrong");
+    const error = new Error(data.error || "Something went wrong.");
+    (error as Error & { code?: string }).code = data.code;
+    throw error;
   }
-
-  return data;
+  return data as T;
 }
 
-export async function createBooking(data: BookingData): Promise<string> {
-  const result = await bookingApi({ action: "create", ...data });
-  return result.id;
+export async function getAvailability(
+  sessionTypeId?: string
+): Promise<AvailabilityResponse> {
+  const params = new URLSearchParams();
+  if (sessionTypeId) params.set("type", sessionTypeId);
+  const res = await fetch(`/api/availability?${params.toString()}`);
+  if (!res.ok) throw new Error("Could not load available times.");
+  return (await res.json()) as AvailabilityResponse;
 }
 
-export async function updateBookingCalendly(
-  bookingId: string,
-  calendly: CalendlyData
-) {
-  await bookingApi({ action: "update_calendly", bookingId, calendly });
+export interface CreateBookingInput {
+  sessionTypeId: string;
+  startMs: number;
+  category: string;
+  concern: string;
+  /** Session-specific acknowledgements, confirmed on every booking. */
+  consent: {
+    paidSession: boolean;
+    paymentFirst: boolean;
+    communicationConsent: boolean;
+    notes?: string;
+  };
 }
 
-export async function updateBookingConsent(
-  bookingId: string,
-  consent: ConsentData
-) {
-  await bookingApi({ action: "update_consent", bookingId, consent });
+export interface CreateBookingResult {
+  id: string;
+  startISO: string;
+  endISO: string;
+  date: string;
+  time: string;
+  timezone: string;
+  meetLink: string | null;
+  calendarSynced: boolean;
 }
 
-export async function getBooking(
+export function createBooking(
+  input: CreateBookingInput
+): Promise<CreateBookingResult> {
+  return bookingApi<CreateBookingResult>({ action: "create", ...input });
+}
+
+export function listBookings(): Promise<{ bookings: BookingSummary[] }> {
+  return bookingApi<{ bookings: BookingSummary[] }>({ action: "list" });
+}
+
+export function getBooking(
   bookingId: string
-): Promise<Record<string, unknown> | null> {
-  try {
-    const result = await bookingApi({ action: "get", bookingId });
-    return result.booking || null;
-  } catch {
-    return null;
-  }
+): Promise<{ booking: BookingSummary }> {
+  return bookingApi<{ booking: BookingSummary }>({ action: "get", bookingId });
 }
 
-/* ----------  Email verification (OTP)  ---------- */
-
-export type OtpPurpose = "client" | "guardian";
-
-async function otpApi(body: Record<string, unknown>) {
-  const res = await fetch("/api/otp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || "Something went wrong");
-  }
-  return data;
-}
-
-/** Send a 6-digit verification code to the given email. */
-export async function sendEmailOtp(
-  bookingId: string,
-  purpose: OtpPurpose,
-  email: string
-): Promise<{ cooldownMs?: number }> {
-  return otpApi({ action: "send", bookingId, purpose, email });
-}
-
-/** Verify the code the user entered. Resolves on success, throws on failure. */
-export async function verifyEmailOtp(
-  bookingId: string,
-  purpose: OtpPurpose,
-  email: string,
-  code: string
-): Promise<void> {
-  await otpApi({ action: "verify", bookingId, purpose, email, code });
+export function cancelBooking(
+  bookingId: string
+): Promise<{ success: boolean }> {
+  return bookingApi<{ success: boolean }>({ action: "cancel", bookingId });
 }

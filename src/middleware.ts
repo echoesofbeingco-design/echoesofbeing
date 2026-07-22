@@ -32,9 +32,16 @@ setInterval(() => {
 }, 120_000);
 
 // ── Routes that require authentication ─────────────────────────────────────
-const PROTECTED_PATHS = ["/community/new", "/community/profile"];
+// Booking requires an account so that terms/consent are accepted once at
+// sign-up rather than at every booking.
+const PROTECTED_PATHS = [
+  "/book",
+  "/profile",
+  "/community/new",
+  "/community/profile",
+];
 
-// Auth pages — redirect to community if already logged in
+// Auth pages — redirect away if already logged in
 const AUTH_PATHS = ["/auth/login", "/auth/signup"];
 
 export async function middleware(request: NextRequest) {
@@ -54,10 +61,10 @@ export async function middleware(request: NextRequest) {
   // the community-only auth pages to the homepage so search engines consolidate
   // link equity to home and nothing dangles. API routes (/api/community,
   // /api/auth) are left untouched. Flip COMMUNITY_ENABLED to restore the pages.
-  if (
-    !COMMUNITY_ENABLED &&
-    (pathname.startsWith("/community") || pathname.startsWith("/auth"))
-  ) {
+  // NOTE: /auth is deliberately NOT redirected any more. Accounts are now used
+  // for booking (so consent is captured once), independently of the community
+  // feature. Only the community's own pages stay hidden behind the flag.
+  if (!COMMUNITY_ENABLED && pathname.startsWith("/community")) {
     return NextResponse.redirect(new URL("/", request.url), 301);
   }
 
@@ -101,9 +108,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages, honouring ?redirect=
   if (isAuthPage && isAuthenticated) {
-    return NextResponse.redirect(new URL("/community", request.url));
+    const target = request.nextUrl.searchParams.get("redirect");
+    const safeTarget = target && target.startsWith("/") ? target : "/profile";
+    return NextResponse.redirect(new URL(safeTarget, request.url));
   }
 
   return response;
@@ -111,6 +120,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/book/:path*",
+    "/book",
+    "/profile/:path*",
+    "/profile",
     "/community/:path*",
     "/auth/:path*",
     "/api/community/:path*",
