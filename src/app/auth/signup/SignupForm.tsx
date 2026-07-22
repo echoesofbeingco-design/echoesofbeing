@@ -87,10 +87,13 @@ export default function SignupForm() {
       }
 
       await refresh();
+      // Drop RSC payloads cached while signed out, or the prefetched /book
+      // redirect gets replayed and bounces them back here.
+      router.refresh();
       // Send them onward to wherever they were headed (usually /book).
       const params = new URLSearchParams(window.location.search);
       const target = params.get("redirect");
-      router.push(target && target.startsWith("/") ? target : "/profile");
+      router.replace(target && target.startsWith("/") ? target : "/profile");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

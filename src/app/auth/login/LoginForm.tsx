@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -8,12 +8,26 @@ import { useAuth } from "@/components/AuthProvider";
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { refresh } = useAuth();
+  const { user, loading: authLoading, refresh } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const target = useCallback(() => {
+    const t = searchParams.get("redirect");
+    return t && t.startsWith("/") ? t : "/profile";
+  }, [searchParams]);
+
+  // The proxy no longer bounces signed-in visitors away from this page (doing
+  // so risked a redirect loop against the server-side session check), so send
+  // them on from here instead.
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace(target());
+    }
+  }, [authLoading, user, router, target]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,8 +49,11 @@ export default function LoginForm() {
       }
 
       await refresh();
-      const target = searchParams.get("redirect");
-      router.push(target && target.startsWith("/") ? target : "/profile");
+      // Drop any RSC payloads cached while signed out — /book is prefetched
+      // from the header, and replaying that cached redirect would land the
+      // visitor straight back on this page.
+      router.refresh();
+      router.replace(target());
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

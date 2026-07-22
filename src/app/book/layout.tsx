@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireSession } from "@/lib/require-session";
 
 export const metadata: Metadata = {
   title: "Book a Session",
@@ -14,10 +15,12 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function BookLayout({
+export default async function BookLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Authoritative check — the proxy only confirms a cookie exists.
+  await requireSession("/book");
   return children;
 }

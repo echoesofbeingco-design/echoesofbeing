@@ -44,7 +44,13 @@ const PROTECTED_PATHS = [
 // Auth pages — redirect away if already logged in
 const AUTH_PATHS = ["/auth/login", "/auth/signup"];
 
-export async function middleware(request: NextRequest) {
+/**
+ * This is an optimistic gate. The authoritative session check lives in the
+ * Node runtime — `requireSession()` in the /book and /profile layouts, plus
+ * the checks each API route performs. See the Next.js docs: proxy "should not
+ * be used as a full session management or authorization solution".
+ */
+export async function proxy(request: NextRequest) {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
@@ -88,11 +94,23 @@ export async function middleware(request: NextRequest) {
 
   if (!needsAuth && !isAuthPage) return response;
 
+  // A missing secret would make every visitor look logged out, which silently
+  // bounces them between /book and /auth/login with nothing in the logs. Say
+  // so loudly and defer to the layout guard rather than locking everyone out.
+  if (!key) {
+    console.error(
+      "proxy: SESSION_SECRET is not available in the proxy bundle — " +
+        "skipping the optimistic auth check. Protected routes still enforce " +
+        "the session server-side via requireSession()."
+    );
+    return response;
+  }
+
   // Verify session
   const sessionCookie = request.cookies.get("eob_session")?.value;
   let isAuthenticated = false;
 
-  if (sessionCookie && key) {
+  if (sessionCookie) {
     try {
       await jwtVerify(sessionCookie, key, { algorithms: ["HS256"] });
       isAuthenticated = true;
