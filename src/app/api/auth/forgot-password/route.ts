@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         <div style="font-family: 'Georgia', serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #2d352d;">
           <h2 style="font-size: 22px; font-weight: 500; margin-bottom: 16px;">Reset your password</h2>
           <p style="font-size: 15px; line-height: 1.6; color: #5a6055; margin-bottom: 24px;">
-            We received a request to reset the password for your Echoes of Being community account.
+            We received a request to reset the password for your Echoes of Being account.
             Click the button below to choose a new password.
           </p>
           <a href="${resetLink}" style="display: inline-block; background: #617962; color: #f7f5ec; padding: 12px 32px; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 500;">

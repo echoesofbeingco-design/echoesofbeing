@@ -198,7 +198,8 @@ async function handleCreate(userId: string, data: Record<string, unknown>) {
     const neighbourQuery = adminDb
       .collection("bookings")
       .where("slot.startMs", ">=", startMs - windowMs)
-      .where("slot.startMs", "<=", startMs + windowMs);
+      .where("slot.startMs", "<=", startMs + windowMs)
+      .select("status", "slot");
     const neighbours = await t.get(neighbourQuery);
 
     if (lockSnap.exists) throw new SlotTakenError();

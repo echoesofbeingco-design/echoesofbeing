@@ -3,7 +3,8 @@ import SignupForm from "./SignupForm";
 
 export const metadata: Metadata = {
   title: "Sign Up",
-  description: "Join the Echoes of Being community, a safe space for healing conversations.",
+  description:
+    "Create your Echoes of Being account to book and manage your sessions.",
 };
 
 export default function SignupPage() {
@@ -12,10 +13,10 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <h1 className="font-serif text-3xl md:text-4xl font-medium mb-3">
-            Join the community
+            A few quick details
           </h1>
           <p className="text-muted">
-            A safe space to share, reflect, and be heard
+            It takes a moment. What you share stays private.
           </p>
         </div>
         <SignupForm />

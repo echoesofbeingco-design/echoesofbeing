@@ -67,6 +67,9 @@ export async function getBusyIntervals(
     .collection("bookings")
     .where("slot.startMs", ">=", fromMs - EDGE_PAD_MS)
     .where("slot.startMs", "<=", toMs + EDGE_PAD_MS)
+    // Only these two fields are read below; without the projection this
+    // pulls every booking's name, email, WhatsApp and concern text.
+    .select("status", "slot")
     .get();
 
   const busy: BusyInterval[] = [];

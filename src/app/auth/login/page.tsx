@@ -4,7 +4,7 @@ import LoginForm from "./LoginForm";
 
 export const metadata: Metadata = {
   title: "Log In",
-  description: "Log in to the Echoes of Being community.",
+  description: "Sign in to book and manage your Echoes of Being sessions.",
 };
 
 export default function LoginPage() {
@@ -16,7 +16,7 @@ export default function LoginPage() {
             Welcome back
           </h1>
           <p className="text-muted">
-            Log in to your community account
+            Your sessions are right below.
           </p>
         </div>
         <Suspense fallback={<div className="h-64 animate-pulse" />}>

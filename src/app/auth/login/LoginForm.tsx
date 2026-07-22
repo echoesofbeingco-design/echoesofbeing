@@ -118,7 +118,7 @@ export default function LoginForm() {
         disabled={loading}
         className="w-full bg-sage-600 text-cream py-3.5 rounded-full text-sm font-medium hover:bg-sage-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? "Logging in..." : "Log in"}
+        {loading ? "Just a moment..." : "Continue"}
       </button>
 
       <p className="text-center text-sm text-muted">

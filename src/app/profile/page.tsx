@@ -260,7 +260,11 @@ export default function ProfilePage() {
             <h1 className="display text-4xl md:text-5xl mb-3">
               Hello, {user.displayName.split(" ")[0]}.
             </h1>
-            <p className="text-muted">{user.email}</p>
+            <p className="text-muted mb-2">
+              Book a time, see what&apos;s coming up, and make changes when you
+              need to. It&apos;s all here.
+            </p>
+            <p className="text-muted text-sm">{user.email}</p>
           </div>
           <button
             onClick={handleLogout}
