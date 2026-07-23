@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 /**
  * In-house confirmation dialog. Replaces window.confirm(), which renders an
  * unstyled browser chrome box that breaks the feel of the site.
+ *
+ * Rendered through a portal to <body> on purpose. PageTransition wraps every
+ * page in a div carrying a `transform`, and a transform other than `none`
+ * makes that element the containing block for `position: fixed` children —
+ * so `fixed inset-0` would centre the dialog inside the (very tall) page
+ * content instead of the viewport, pushing it off-screen. Escaping to <body>
+ * is what keeps "fixed" meaning fixed.
  */
 export default function ConfirmDialog({
   open,
@@ -27,6 +35,10 @@ export default function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  // Portals need a DOM target, which doesn't exist during SSR.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   // Escape to dismiss, and stop the page scrolling behind the dialog.
   useEffect(() => {
     if (!open) return;
@@ -42,9 +54,9 @@ export default function ConfirmDialog({
     };
   }, [open, busy, onCancel]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-6"
       role="dialog"
@@ -81,6 +93,7 @@ export default function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
