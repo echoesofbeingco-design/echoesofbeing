@@ -32,8 +32,10 @@ const sections = [
     title: "Information collected automatically",
     content: [
       "We deliberately keep this to a minimum.",
-      "We do not use Google Analytics, advertising pixels, social media trackers, session recording, or any third-party analytics or profiling tools on this website. We do not build advertising profiles about you, and we do not sell or share your data with advertisers. Ever.",
-      "The only cookie our website sets is an essential sign-in cookie that keeps you logged in to your account. It contains a signed token identifying your session, is marked HttpOnly so it cannot be read by scripts in your browser, and expires after seven days. It is strictly necessary for the site to work and is not used for tracking.",
+      "We do not use Google Analytics, advertising pixels, social media trackers, session recording, heatmaps, or any third-party analytics or profiling tools on this website. We do not build advertising profiles about you, and we do not sell or share your data with advertisers. Ever.",
+      "We do measure how the website is used, but we do it ourselves rather than handing it to anyone else. When you open a page we record the page address, the website that referred you if any, and whether you are on a phone, tablet or computer. This goes to our own servers and no third party ever receives it.",
+      "That measurement sets no cookies and stores nothing on your device, which is why you are not asked to dismiss a cookie banner. To count visitors without identifying them, we convert your IP address and browser into a short scrambled code using a secret key. Your IP address itself is never stored, the code cannot be turned back into it, and it is regenerated every day, so the same person cannot be recognised from one day to the next. We can see that forty people read an article; we cannot see that you did.",
+      "The only cookie our website sets is still the essential sign-in cookie that keeps you logged in to your account. It contains a signed token identifying your session, is marked HttpOnly so it cannot be read by scripts in your browser, and expires after seven days. It is strictly necessary for the site to work and is not used for tracking.",
       "Like virtually all websites, our hosting provider processes standard technical information such as your IP address and browser type in order to serve pages and to protect the service against abuse and denial-of-service attacks. We use IP addresses only for rate limiting and security, not to identify or profile you.",
     ],
   },

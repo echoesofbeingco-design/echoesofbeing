@@ -88,6 +88,9 @@ export const rateLimits = {
   /** Reports: 3 per minute */
   report: (ip: string) => rateLimit(`report:${ip}`, 3, 60_000),
 
+  /** Analytics beacons: generous, but bounded so it can't be used to flood. */
+  track: (ip: string) => rateLimit(`track:${ip}`, 120, 60_000),
+
   /** Upvotes: 30 per minute */
   upvote: (ip: string) => rateLimit(`upvote:${ip}`, 30, 60_000),
 };

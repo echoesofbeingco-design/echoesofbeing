@@ -11,6 +11,7 @@ import {
   type CreateBookingResult,
 } from "@/lib/booking";
 import { showToast } from "@/components/Toast";
+import { trackEvent } from "@/components/Analytics";
 import { formatDateOfBirth } from "@/lib/profile-fields";
 
 type Step = "type" | "time" | "details" | "done";
@@ -94,6 +95,11 @@ export default function BookPage() {
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [needsTerms, setNeedsTerms] = useState(false);
 
+  // One "reached the booking page" event, for the funnel.
+  useEffect(() => {
+    trackEvent("book_viewed");
+  }, []);
+
   // Load the bookable session types once.
   useEffect(() => {
     getAvailability()
@@ -157,6 +163,7 @@ export default function BookPage() {
   );
 
   function chooseType(id: string) {
+    trackEvent("book_type_selected");
     setSessionTypeId(id);
     setStep("time");
     loadSlots(id);
@@ -192,6 +199,7 @@ export default function BookPage() {
         },
       });
       setResult(booking);
+      trackEvent("book_completed");
       setStep("done");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
@@ -447,7 +455,10 @@ export default function BookPage() {
 
                 <button
                   disabled={!selectedSlot}
-                  onClick={() => setStep("details")}
+                  onClick={() => {
+                    trackEvent("book_slot_selected");
+                    setStep("details");
+                  }}
                   className="btn-pill disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Continue

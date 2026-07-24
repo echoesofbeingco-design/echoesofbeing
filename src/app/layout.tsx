@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Lora, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import TopLoader from "@/components/TopLoader";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
+import Analytics from "@/components/Analytics";
 import PreloadImages from "@/components/PreloadImages";
 import ToastProvider from "@/components/Toast";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -168,6 +170,9 @@ export default function RootLayout({
           <FloatingBookBtn />
           <PreloadImages />
           <ToastProvider />
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
         </AuthProvider>
       </body>
     </html>
