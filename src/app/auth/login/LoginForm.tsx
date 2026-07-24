@@ -14,6 +14,11 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // Set when the account exists but the practice created it and no password
+  // has been chosen yet — we offer to send a fresh set-password link.
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [sendingLink, setSendingLink] = useState(false);
+  const [linkSent, setLinkSent] = useState(false);
 
   const target = useCallback(() => {
     const t = searchParams.get("redirect");
@@ -29,9 +34,24 @@ export default function LoginForm() {
     }
   }, [authLoading, user, router, target]);
 
+  async function sendSetPasswordLink() {
+    setSendingLink(true);
+    try {
+      await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      setLinkSent(true);
+    } finally {
+      setSendingLink(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setNeedsPassword(false);
     setLoading(true);
 
     try {
@@ -45,6 +65,7 @@ export default function LoginForm() {
 
       if (!res.ok) {
         setError(data.error || "Login failed");
+        setNeedsPassword(data.code === "MUST_SET_PASSWORD");
         return;
       }
 
@@ -64,8 +85,29 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-          {error}
+        <div
+          className={`text-sm rounded-xl px-4 py-3 ${
+            needsPassword
+              ? "bg-secondary-bg/60 border border-sage-400/40 text-forest"
+              : "bg-red-50 border border-red-200 text-red-700"
+          }`}
+        >
+          <p>{error}</p>
+          {needsPassword && !linkSent && (
+            <button
+              type="button"
+              onClick={sendSetPasswordLink}
+              disabled={sendingLink}
+              className="mt-2 text-sage-600 hover:text-sage-700 font-medium underline disabled:opacity-50"
+            >
+              {sendingLink ? "Sending…" : "Email me a link to set it"}
+            </button>
+          )}
+          {linkSent && (
+            <p className="mt-2 text-forest">
+              Sent. Check your inbox for a link to set your password.
+            </p>
+          )}
         </div>
       )}
 

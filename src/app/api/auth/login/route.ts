@@ -46,6 +46,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Accounts the practice created have no password until the client sets
+    // one. Say so plainly rather than "invalid password", which would be both
+    // wrong and a dead end — the login page offers to resend the link.
+    if (!user.passwordHash || user.mustSetPassword) {
+      return NextResponse.json(
+        {
+          error:
+            "Your account was created by the practice. Set a password to continue.",
+          code: "MUST_SET_PASSWORD",
+        },
+        { status: 403 }
+      );
+    }
+
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
       return NextResponse.json(

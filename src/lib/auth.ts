@@ -34,6 +34,12 @@ export interface CommunityUser {
   role?: "user" | "admin";
   /** Link to the clinical `clients` record, once they book. */
   clientId?: string;
+  /**
+   * True for accounts the practice created on the client's behalf. Such an
+   * account has an empty passwordHash and cannot be logged into until the
+   * person sets a password from their invite email.
+   */
+  mustSetPassword?: boolean;
 }
 
 export interface NewUserProfile {
@@ -140,6 +146,8 @@ export async function updatePassword(
   const passwordHash = await hashPassword(newPassword);
   await adminDb.collection("community_users").doc(userId).update({
     passwordHash,
+    // Whatever route they came in by, they now have a password of their own.
+    mustSetPassword: false,
     updatedAt: new Date().toISOString(),
   });
 }

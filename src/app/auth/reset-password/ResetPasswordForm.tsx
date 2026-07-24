@@ -15,6 +15,8 @@ export default function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [validating, setValidating] = useState(true);
   const [tokenError, setTokenError] = useState("");
+  // "invite" when the practice created the account for them.
+  const [kind, setKind] = useState<"reset" | "invite">("reset");
 
   // Validate token on page load
   useEffect(() => {
@@ -26,6 +28,7 @@ export default function ResetPasswordForm() {
     fetch(`/api/auth/reset-password?token=${encodeURIComponent(token)}`)
       .then((res) => res.json())
       .then((data) => {
+        if (data.kind) setKind(data.kind);
         if (!data.valid) {
           setTokenError(data.error || "This reset link is invalid.");
         }
@@ -208,7 +211,7 @@ export default function ResetPasswordForm() {
         disabled={loading}
         className="w-full bg-sage-600 text-cream py-3.5 rounded-full text-sm font-medium hover:bg-sage-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? "Resetting..." : "Reset password"}
+        {loading ? "Saving..." : kind === "invite" ? "Set my password" : "Reset password"}
       </button>
     </form>
   );

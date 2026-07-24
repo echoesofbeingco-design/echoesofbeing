@@ -60,7 +60,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ valid: true });
+    // "invite" tokens come from the practice creating an account on the
+    // client's behalf, so the page says "set" rather than "reset".
+    return NextResponse.json({
+      valid: true,
+      kind: tokenData.kind === "invite" ? "invite" : "reset",
+    });
   } catch (error) {
     console.error("Token validation error:", error);
     return NextResponse.json(
