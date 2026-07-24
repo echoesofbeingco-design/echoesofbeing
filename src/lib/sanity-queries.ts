@@ -18,6 +18,30 @@ const postFieldsFull = `
   body
 `;
 
+/**
+ * Strip category references that did not resolve.
+ *
+ * A `categories[]->` dereference yields null when the referenced document is
+ * missing — deleted, or only ever saved as a draft. The raw shape is therefore
+ * `(Category | null)[]`, and mapping it straight to `cat.title` took the whole
+ * /echoes page down with a 500. Cleaning the data once here means every
+ * consumer can trust the type it was already given.
+ */
+function cleanPost<T extends SanityPost | null>(post: T): T {
+  if (!post) return post;
+  const categories = Array.isArray(post.categories)
+    ? post.categories.filter(
+        (c): c is NonNullable<(typeof post.categories)[number]> =>
+          Boolean(c) && Boolean(c?._id)
+      )
+    : [];
+  return { ...post, categories } as T;
+}
+
+function cleanPosts(posts: SanityPost[]): SanityPost[] {
+  return (posts ?? []).filter(Boolean).map((p) => cleanPost(p));
+}
+
 // ── Posts ───────────────────────────────────────────────────────────────────
 
 export async function getPosts(
@@ -48,7 +72,7 @@ export async function getPosts(
   ]);
 
   return {
-    items,
+    items: cleanPosts(items),
     total,
     page,
     pageSize,
@@ -61,7 +85,7 @@ export async function getPostBySlug(slug: string): Promise<SanityPost | null> {
     `*[_type == "post" && slug.current == $slug][0] { ${postFieldsFull} }`,
     { slug }
   );
-  return post;
+  return cleanPost(post);
 }
 
 export async function getRelatedPosts(
@@ -71,15 +95,19 @@ export async function getRelatedPosts(
 ): Promise<SanityPost[]> {
   if (categorySlugs.length === 0) {
     // Just get latest posts excluding current
-    return sanityClient.fetch<SanityPost[]>(
-      `*[_type == "post" && slug.current != $currentSlug] | order(publishedAt desc) [0...${limit}] { ${postFields} }`,
-      { currentSlug }
+    return cleanPosts(
+      await sanityClient.fetch<SanityPost[]>(
+        `*[_type == "post" && slug.current != $currentSlug] | order(publishedAt desc) [0...${limit}] { ${postFields} }`,
+        { currentSlug }
+      )
     );
   }
 
-  return sanityClient.fetch<SanityPost[]>(
-    `*[_type == "post" && slug.current != $currentSlug && count((categories[]->slug.current)[@ in $categorySlugs]) > 0] | order(publishedAt desc) [0...${limit}] { ${postFields} }`,
-    { currentSlug, categorySlugs }
+  return cleanPosts(
+    await sanityClient.fetch<SanityPost[]>(
+      `*[_type == "post" && slug.current != $currentSlug && count((categories[]->slug.current)[@ in $categorySlugs]) > 0] | order(publishedAt desc) [0...${limit}] { ${postFields} }`,
+      { currentSlug, categorySlugs }
+    )
   );
 }
 
@@ -92,7 +120,9 @@ export async function getAllPostSlugs(): Promise<string[]> {
 // ── Categories ─────────────────────────────────────────────────────────────
 
 export async function getCategories(): Promise<SanityCategory[]> {
-  return sanityClient.fetch<SanityCategory[]>(
+  const cats = await sanityClient.fetch<SanityCategory[]>(
     `*[_type == "category"] | order(title asc) { _id, title, slug, description }`
   );
+  // A category with no slug would break the filter links, so drop it.
+  return (cats ?? []).filter((c) => c && c._id && c.slug?.current);
 }

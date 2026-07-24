@@ -47,7 +47,9 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   const categorySlugs =
-    post.categories?.map((c) => c.slug.current) || [];
+    post.categories
+      ?.filter((c) => c?.slug?.current)
+      .map((c) => c.slug.current) ?? [];
 
   const relatedPosts = await getRelatedPosts(
     post.slug.current,
@@ -150,7 +152,7 @@ export default async function BlogPostPage({
           {/* Categories */}
           {post.categories && post.categories.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-5">
-              {post.categories.map((cat) => (
+              {post.categories.filter(Boolean).map((cat) => (
                 <Link
                   key={cat._id}
                   href={`/echoes?category=${cat.slug.current}`}

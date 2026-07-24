@@ -172,7 +172,7 @@ export default function BlogListClient({
             >
               All
             </button>
-            {categories.map((cat) => (
+            {categories.filter(Boolean).map((cat) => (
               <button
                 key={cat._id}
                 onClick={() => handleCategoryClick(cat.slug.current)}

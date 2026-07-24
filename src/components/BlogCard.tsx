@@ -35,7 +35,7 @@ export default function BlogCard({ post }: { post: SanityPost }) {
           {/* Categories */}
           {post.categories && post.categories.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
-              {post.categories.map((cat) => (
+              {post.categories.filter(Boolean).map((cat) => (
                 <span
                   key={cat._id}
                   className="text-[11px] font-semibold tracking-wider uppercase text-sage-600 bg-secondary-bg/60 px-2.5 py-1 rounded-full"

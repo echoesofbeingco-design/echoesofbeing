@@ -11,6 +11,15 @@ export const sanityConfig = {
 export const sanityClient = createClient({
   ...sanityConfig,
   token: process.env.SANITY_API_TOKEN,
+  /**
+   * Public site — published documents only.
+   *
+   * A token-authenticated client otherwise includes drafts, which meant
+   * unpublished posts were being served on the live site, and a draft post
+   * referencing a draft-only category dereferenced to null and crashed
+   * /echoes. There is no preview mode here, so nothing needs draft access.
+   */
+  perspective: "published",
 });
 
 // Image URL builder
